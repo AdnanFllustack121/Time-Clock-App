@@ -10,8 +10,15 @@ export default function Header({ title, component }) {
 
     const handleLogout = useCallback(() => {
         localStorage.removeItem("time_clock_token")
-        navigate('/app')
-
+        store.user = {
+            firstName: '',
+            lastName: '',
+            email: '',
+            isAdmin: false,
+            isUserDocEmpty: false,
+            isLoggedIn: false
+        }
+        navigate('/app/Login')
     }, [])
 
     return (

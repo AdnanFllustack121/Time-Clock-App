@@ -1,88 +1,99 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import {
   IndexTable,
-  Box, SkeletonBodyText, 
+  Box,
+  SkeletonBodyText,
+  Text,
+  ButtonGroup,
+  Button,
+  Icon,
+  Divider
 } from '@shopify/polaris';
+import { ChatIcon } from '@shopify/polaris-icons';
+import moment from 'moment';
+import './css/todaysClockTable.css';
 
-export default function TodaysClockTable({ setFetchAgain }) {
-  const [Data, setData] = useState([])
+function formatTime(time) {
+  return moment(time).format('HH:mm:ss');
+}
 
-  const [isLoading, setIsLoading] = useState(true)
+function calculateDuration(inTime, outTime, forTotal, todaysAttendance) {
+  let diffInMilliseconds = 0
+  // console.log('inTime, outTime', inTime, outTime);
+  if (forTotal) {
+    todaysAttendance.forEach(({ in_time, out_time }) => {
+      if (out_time) {
+        diffInMilliseconds += new Date(out_time) - new Date(in_time);
+      }
+    });
+  } else {
+    if (outTime) diffInMilliseconds = Math.abs(new Date(outTime) - new Date(inTime));
+  }
 
+  // console.log('diffInMilliseconds',diffInMilliseconds);
+  const hours = Math.floor(diffInMilliseconds / 3600000);
+  const minutes = Math.floor((diffInMilliseconds % 3600000) / 60000);
+  const seconds = Math.floor((diffInMilliseconds % 60000) / 1000);
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
 
-  const rowMarkup = Data?.map(
-    ({ _id,
-      campaignName,
-      storeURL,
-      selectedImage,
-      previewSubject }, i) => (
-      <IndexTable.Row
-        id={_id}
-        key={_id}
-      >
-        <IndexTable.Cell>
-          <div style={{ whiteSpace: 'pre-wrap', width: '350px', fontWeight: '700' }}>
-            {campaignName}
-          </div>
-        </IndexTable.Cell>
-        <IndexTable.Cell>
+export default function TodaysClockTable({ todaysAttendance, isLoadingClockInCard, handleViewNote }) {
+  const [totalDuration, setTotalDuration] = useState("--");
 
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span>
-              {selectedImage ? <img
-                className='message-image'
-                src={`/uploads/${storeURL}/${selectedImage}`}
-                alt="Message Image"
-                style={{
-                  height: '45px', width: '45px', objectFit: 'cover',
-                  borderRadius: '10%', marginRight: '10px'
-                }}
-              /> :
-                <img
-                  style={{
-                    height: '45px', width: '45px', objectFit: 'cover',
-                    borderRadius: '10%', marginRight: '10px', visibility: 'hidden'
-                  }}
-                />
-              }
-            </span>
-            <div style={{ whiteSpace: 'pre-wrap', maxWidth: '300px' }}>
-              {previewSubject}
-            </div>
-          </div>
-        </IndexTable.Cell>
+  useEffect(() => {
+    if (!isLoadingClockInCard) {
+      const totalDurationString = calculateDuration('', '', true, todaysAttendance);
+      setTotalDuration(totalDurationString);
+    }
+  }, [todaysAttendance, isLoadingClockInCard]);
 
-      </IndexTable.Row>
-    )
-  );
+  const rowMarkup = todaysAttendance?.map(({ _id, in_time, out_time, note }, i) => (
+    <IndexTable.Row key={_id}>
+      <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{i + 1}</Text></IndexTable.Cell>
+      <IndexTable.Cell>{moment(in_time).format('MMM DD, YYYY')}</IndexTable.Cell>
+      <IndexTable.Cell>{formatTime(in_time)}</IndexTable.Cell>
+      <IndexTable.Cell>{out_time ? moment(out_time).format('MMM DD, YYYY') : "--"}</IndexTable.Cell>
+      <IndexTable.Cell>{out_time ? formatTime(out_time) : "--"}</IndexTable.Cell>
+      <IndexTable.Cell>
+        <ButtonGroup>
+          {note}
+          <Button
+            icon={<Icon source={ChatIcon} />}
+            onClick={() => handleViewNote(_id, note)}
+          />
+        </ButtonGroup>
+      </IndexTable.Cell>
+      <IndexTable.Cell>{calculateDuration(in_time, out_time)}</IndexTable.Cell>
+    </IndexTable.Row>
+  ));
 
   return (
-    <>
-      <div className='table' style={{ marginBottom: '26px' }}>
-
-        {isLoading ?
-          <Box paddingBlockStart="200">
-            <SkeletonBodyText
-              lines={6}
-            />
-          </Box>
-          :
-          <IndexTable
-            itemCount={Data.length}
-            headings={[
-              { title: 'Campaign Name' },
-              { title: 'Preview Subject' },
-              { title: 'Action' }
-
-            ]}
-            selectable={false}
-          >
-            {rowMarkup}
-          </IndexTable>
-        }
-      </div>
-    </>
-
-
+    <div className='table' style={{ marginBottom: '26px' }}>
+      {isLoadingClockInCard ?
+        <Box paddingBlockStart="200">
+          <SkeletonBodyText lines={6} />
+        </Box>
+        :
+        <IndexTable
+          itemCount={todaysAttendance?.length ?? 0}
+          headings={[
+            { title: 'No.' },
+            { title: 'In Date' },
+            { title: 'In Time' },
+            { title: 'Out Date' },
+            { title: 'Out Time' },
+            { title: 'Note' },
+            { title: 'Duration' },
+          ]}
+          selectable={false}
+        >
+          {rowMarkup}
+        </IndexTable>
+      }
+      {todaysAttendance.length > 0 && <><Divider />
+        <div className='total_hours'>
+          <Text variant="headingMd" as="h6">{`Total Hours: ${totalDuration}`}</Text>
+        </div></>}
+    </div>
   );
 }

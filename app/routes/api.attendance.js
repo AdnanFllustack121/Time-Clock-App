@@ -12,6 +12,7 @@ export const action = async ({ request }) => {
         const { admin, session } = await authenticate.admin(request);
 
         let attendanceRecord;
+        let message;
         if (data.status === 'incomplete') {
 
             attendanceRecord = new AttendanceModel({
@@ -22,23 +23,25 @@ export const action = async ({ request }) => {
             })
 
             await attendanceRecord.save()
+
+            message = 'Clocked-In Successfully.'
         } else {
             attendanceRecord = await AttendanceModel.findOneAndUpdate({
                 _id: data.idToUpdate
             }, {
                 out_time: data.out_time,
-                note: data.note,
+                ...(data.note.length > 0 ? {note: data.note} : {}),
                 status: data.status
             },
                 { new: true }
             )
+
+            message = 'Clocked-Out Successfully.'
+
         }
 
-        console.log('attendanceRecord', attendanceRecord);
-
-
         return json({
-            message: 'success',
+            message,
             attendanceData: attendanceRecord
         })
     } catch (error) {

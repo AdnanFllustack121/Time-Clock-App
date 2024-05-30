@@ -7,16 +7,21 @@ import ModalComponent from '../ModalComponent';
 import { useSnapshot } from 'valtio';
 import { store } from '../../valtio/store';
 import { showToast } from '../Toast';
+import TodaysClockTable from './TodaysClockTable';
 
 function EmployeeClockInOut() {
   const [clockedIn, setClockedIn] = useState(false);
   const [currentTime, setCurrentTime] = useState(moment().format('HH:mm:ss'));
   const [currentDate, setCurrentDate] = useState(moment().format('MMM DD, YYYY'));
-  const [isClockout, setClockOut] = useState(false)
+  const [openNoteModal, setOpenNoteModal] = useState({
+    isOpen: false,
+    type: ''
+  })
   const [note, setNote] = useState("")
   const [isLoadingButton, setLoadingButton] = useState(false)
   const [isLoadingClockInCard, setLoadingClockInCard] = useState(false)
   const [todaysAttendance, setTodaysAttendance] = useState([])
+  const [editNoteId, setEditNoteId] = useState('')
   const snap = useSnapshot(store)
 
   useEffect(() => {
@@ -32,7 +37,7 @@ function EmployeeClockInOut() {
       setLoadingClockInCard(true)
       try {
 
-        const response = await fetch(`/api/getAttendance/${snap.user.email}`, {
+        const response = await fetch(`/api/getAttendance/${snap.user.email}/${new Date()}`, {
           method: 'get',
           headers: {
             "Content-Type": "application/json",
@@ -60,10 +65,9 @@ function EmployeeClockInOut() {
 
   const handleClockIn = useCallback(async () => {
     setLoadingButton(true)
-    let clocInTime = moment().format('DD-MMM-YYYY HH:mm:ss')
 
     const apiData = {
-      in_time: clocInTime,
+      in_time: new Date(),
       email: snap.user.email,
       status: 'incomplete',
 
@@ -85,7 +89,7 @@ function EmployeeClockInOut() {
         console.log('response of clockin.......', attendanceData);
         setTodaysAttendance(prevAttendance => [...prevAttendance, attendanceData]);
         setClockedIn(true);
-        showToast('Clocked-In Successfully.')
+        showToast(message)
 
       }
 
@@ -107,11 +111,10 @@ function EmployeeClockInOut() {
   const handleClockOut = useCallback(async () => {
     toggleReasonModal()
     setLoadingButton(true)
-    let clockOutTime = moment().format('DD-MMM-YYYY HH:mm:ss')
     let idToUpdate = todaysAttendance[todaysAttendance.length - 1]?._id
 
     const apiData = {
-      out_time: clockOutTime,
+      out_time: new Date(),
       email: snap.user.email,
       status: "complete",
       note: note,
@@ -133,7 +136,7 @@ function EmployeeClockInOut() {
         console.log('response of clockout.......', attendanceData);
 
         setClockedIn(true);
-        showToast('Clocked-Out Successfully.')
+        showToast(message)
 
         setTodaysAttendance(prevAttendance =>
           prevAttendance.map(d =>
@@ -159,14 +162,65 @@ function EmployeeClockInOut() {
     // setTimeout(() => {
     //   clockOutButton.classList.remove('clock-out-effect');
     // }, 1000);
-  }, [note])
+  }, [note, todaysAttendance])
 
-  useEffect(() => {
-    console.log('todaysAttendance', todaysAttendance);
-  }, [todaysAttendance])
+  const handleViewNote = (id, noteToView) => {
+    setOpenNoteModal({
+      isOpen: true,
+      type: 'editing'
+    })
+    setEditNoteId(id)
+    setNote(noteToView)
+  }
 
   const toggleReasonModal = () => {
-    setClockOut((prev) => !prev)
+    openNoteModal.isOpen && setNote('')
+    setOpenNoteModal((prev) => ({
+      isOpen: !prev.isOpen,
+      type: prev.isOpen ? '' : 'adding'
+    }))
+  }
+
+  const handleEditNote = async () => {
+    setOpenNoteModal({
+      isOpen: false,
+      type: ''
+    })
+
+    try {
+
+      const apiData = {
+        note,
+        idToUpdate: editNoteId
+      }
+
+      const response = await fetch('/api/editNote', {
+        method: 'post',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiData)
+      })
+
+      if (response.ok) {
+        const { message, attendanceData } = await response.json()
+        setTodaysAttendance(prevAttendance =>
+          prevAttendance.map(d =>
+            d._id === editNoteId ? { ...d, note: attendanceData.note } : d
+          )
+        );
+        showToast(message)
+
+      }
+
+    } catch (error) {
+      console.log('error from handleEditNote', error);
+
+    } finally {
+      setEditNoteId('')
+      setNote("")
+
+    }
   }
 
   const clockStartedTime = todaysAttendance[todaysAttendance?.length - 1]?.out_time ?
@@ -174,6 +228,11 @@ function EmployeeClockInOut() {
 
   return (
     <>
+      <div style={{ display: 'flex', justifyContent: 'center' }} >
+        <Text variant="headingXl" as="h4">
+          Clock-in/Clock-out
+        </Text>
+      </div>
       <div className="card-container">
         <div className="card">
           {
@@ -233,18 +292,39 @@ function EmployeeClockInOut() {
           }
 
 
+        </div>
 
+
+      </div>
+      <div className='clockTableHeading'>
+        <Text variant="headingXl" as="h4">
+          Today's clock-in and clock-out records
+        </Text>
+      </div>
+      <div className='table-container'>
+
+        <div className='card-table'>
+          <section>
+            <TodaysClockTable
+              todaysAttendance={todaysAttendance}
+              isLoadingClockInCard={isLoadingClockInCard}
+              handleViewNote={handleViewNote}
+            />
+          </section>
         </div>
       </div>
 
+
+
+
       <ModalComponent
-        isTrue={isClockout}
+        isTrue={openNoteModal.isOpen}
         toggleModal={toggleReasonModal}
-        handlePrimaryAction={handleClockOut}
+        handlePrimaryAction={openNoteModal.type === 'adding' ? handleClockOut : handleEditNote}
         type={"reason"}
         primaryContent={"Save"}
         secondaryContent={"Cancel"}
-        sectionContent={"Please add a note."}
+        sectionContent={openNoteModal.type === 'adding' ? "Please add a note." : "You can update note here."}
         value={note}
         setValue={setNote}
       />

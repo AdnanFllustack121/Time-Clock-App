@@ -6,6 +6,7 @@ import { useSnapshot } from 'valtio';
 import { store } from '../valtio/store';
 import { verifyUser } from '../components/authentications/verifyUser';
 import Loader from '../components/Loader';
+import EmployeeShiftRecords from '../components/ShiftRecords/EmployeeShiftRecords';
 
 
 export default function shiftRecords() {
@@ -38,9 +39,7 @@ export default function shiftRecords() {
                 <Header
                     title={"Shift Records"}
                     component={
-                        <Card>
-                            <Text>Shift Records</Text>
-                        </Card>
+                        <EmployeeShiftRecords />
                     }
                 />
             }
