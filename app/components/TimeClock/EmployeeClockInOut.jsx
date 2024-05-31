@@ -37,7 +37,7 @@ function EmployeeClockInOut() {
       setLoadingClockInCard(true)
       try {
 
-        const response = await fetch(`/api/getAttendance/${snap.user.email}/${new Date()}`, {
+        const response = await fetch(`/api/getAttendance/${snap.user.email}/${new Date()}/${false}/${false}/${false}`, {
           method: 'get',
           headers: {
             "Content-Type": "application/json",

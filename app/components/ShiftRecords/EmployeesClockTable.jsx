@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     IndexTable,
     Box,
@@ -7,11 +7,12 @@ import {
     Button,
     Icon,
     Divider,
-    Tooltip, useSetIndexFiltersMode, IndexFilters
+    Tooltip, useSetIndexFiltersMode, IndexFilters, TextField
 } from '@shopify/polaris';
 import { ChatIcon } from '@shopify/polaris-icons';
 import moment from 'moment';
-import '../TimeClock/TodaysClockTable'
+import '../TimeClock/css/todaysClockTable.css'
+import { showToast } from '../Toast';
 
 function formatTime(time) {
     return moment(time).format('HH:mm:ss');
@@ -37,9 +38,108 @@ function calculateDuration(inTime, outTime, forTotal, shiftRecords) {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-export default function EmployeesClockTable({ shiftRecords, isLoadingTable }) {
+export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setCurrentPage, setCurrentQueryPage, totalPages,
+    hasNextPage, hasPrevPage, calculateItemNumber, setQueryValue, queryValue, setDateFilter, dateFilter }) {
     const [totalDuration, setTotalDuration] = useState("--");
     const { mode, setMode } = useSetIndexFiltersMode();
+    const [itemStrings, setItemStrings] = useState([
+        'Generate Report',
+    ]);
+
+    const handleSelectingStartDate = (_v) => {
+        setDateFilter((prev) => ({ ...prev, startDate: _v }))
+    }
+
+    const handleSelectingEndDate = (_v) => {
+        if (!dateFilter.startDate) return showToast('Please select a start date first.')
+        setDateFilter((prev) => ({ ...prev, endDate: _v }))
+    }
+
+    const filters = [
+        {
+            key: 'startDate',
+            label: 'Start date',
+            filter: (
+                <TextField
+                    value={dateFilter.startDate}
+                    onChange={handleSelectingStartDate}
+                    autoComplete="off"
+                    type='date'
+                />
+            ),
+            shortcut: true,
+        },
+        {
+            key: 'endDate',
+            label: 'End date',
+            filter: (
+                <TextField
+                    value={dateFilter.endDate}
+                    onChange={handleSelectingEndDate}
+                    autoComplete="off"
+                    type='date'
+                />
+            ),
+            shortcut: true,
+        },
+        // {
+        //     key: 'RecordsOF',
+        //     label: 'End date',
+        //     filter: (
+        //         <TextField
+        //             value={dateFilter.endDate}
+        //             onChange={handleSelectingEndDate}
+        //             autoComplete="off"
+        //             type='date'
+        //         />
+        //     ),
+        //     shortcut: true,
+        // },
+
+    ];
+
+    const removeStartDateFilter = () => {
+        // console.log('startDate clear hit');
+        setDateFilter((_p) => ({
+            ..._p,
+            startDate: '',
+        }))
+
+    }
+
+    const removeEndDateFilter = () => {
+        // console.log('endDate clear hit');
+        setDateFilter((_p) => ({
+            ..._p,
+            endDate: ''
+        }))
+    }
+
+    const handleFiltersClearAll = () => {
+        setDateFilter({
+            startDate: '',
+            endDate: ''
+        })
+    }
+
+    const appliedFilters = [{
+        key: "startDate",
+        onRemove: removeStartDateFilter,
+    }, {
+        key: "endDate",
+        onRemove: removeEndDateFilter,
+    }
+    ]
+
+    const tabs = itemStrings.map((item, index) => ({
+        content: item,
+        index,
+        onAction: () => { console.log('hit generate report'); },
+
+    }));
+
+    const handleFiltersQueryChange = useCallback((value) => setQueryValue(value), []);
+
 
     useEffect(() => {
         if (!isLoadingTable) {
@@ -48,10 +148,10 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable }) {
         }
     }, [shiftRecords, isLoadingTable]);
 
-    const rowMarkup = shiftRecords?.map(({ _id, in_time, out_time, note, userDetails }, i) => (
+    const rowMarkup = shiftRecords.length <= 0 ? [] : shiftRecords?.map(({ _id, in_time, out_time, note, userDetails }, i) => (
         <IndexTable.Row key={_id}>
-            <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{i + 1}</Text></IndexTable.Cell>
-            <IndexTable.Cell>{`${userDetails[0].firstName} ${userDetails[0].lastName}`}</IndexTable.Cell>
+            <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{calculateItemNumber(i)}</Text></IndexTable.Cell>
+            <IndexTable.Cell>{`${userDetails?.firstName} ${userDetails?.lastName}`}</IndexTable.Cell>
             <IndexTable.Cell>{moment(in_time).format('MMM DD, YYYY')}</IndexTable.Cell>
             <IndexTable.Cell>{formatTime(in_time)}</IndexTable.Cell>
             <IndexTable.Cell>{out_time ? moment(out_time).format('MMM DD, YYYY') : "--"}</IndexTable.Cell>
@@ -68,24 +168,34 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable }) {
     ));
 
     return (
-        <div className='table' style={{ marginBottom: '26px' }}>
+        <div className='table' style={{
+            // marginBottom: '26px'
+        }}>
             {isLoadingTable ?
                 <Box paddingBlockStart="200">
-                    <SkeletonBodyText lines={6} />
+                    <SkeletonBodyText lines={10} />
                 </Box>
                 :
                 <>
                     <IndexFilters
-                        queryValue={'sd'}
+                        queryValue={queryValue}
                         queryPlaceholder="Searching in all"
-                        onQueryChange={(v) => console.log('value of search', v)}
+                        onQueryChange={handleFiltersQueryChange}
+                        onQueryFocus={() => setCurrentQueryPage(1)}
                         cancelAction={{
-                            onAction: () => '',
+                            onAction: () => { setCurrentPage(1) },
                             disabled: false,
                             loading: false,
                         }}
+                        onQueryClear={() => {
+                            setQueryValue('')
+                        }}
+                        // tabs={tabs}
                         tabs={[]}
-                        filters={[]}
+                        filters={filters}
+                        appliedFilters={appliedFilters}
+                        canCreateNewView={false}
+                        onClearAll={handleFiltersClearAll}
                         mode={mode}
                         setMode={setMode}
                     />
@@ -103,8 +213,24 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable }) {
                         ]}
                         selectable={false}
                         pagination={{
-                            hasNext: true,
-                            onNext: () => { },
+                            hasNext: (dateFilter.startDate || dateFilter.endDate) ? false : hasNextPage,
+                            hasPrevious: (dateFilter.startDate || dateFilter.endDate) ? false : hasPrevPage,
+                            onNext: () => {
+                                if (queryValue.length > 0) {
+                                    setCurrentQueryPage(prevPage => Math.min(prevPage + 1, totalPages))
+                                } else {
+                                    setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages))
+                                }
+
+                            },
+                            onPrevious: () => {
+                                if (queryValue.length > 0) {
+                                    setCurrentQueryPage(prevPage => Math.max(prevPage - 1, 1))
+                                } else {
+                                    setCurrentPage(prevPage => Math.max(prevPage - 1, 1))
+
+                                }
+                            },
                         }}
                     >
                         {rowMarkup}
@@ -112,10 +238,18 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable }) {
                 </>
 
             }
-            {shiftRecords.length > 0 && <><Divider />
+            {shiftRecords.length > 0 && (dateFilter.startDate || dateFilter.endDate) && <><Divider />
                 <div className='total_hours'>
                     <Text variant="headingMd" as="h6">{`Total Hours: ${totalDuration}`}</Text>
                 </div></>}
         </div>
     );
+
+    function isEmpty(value) {
+        if (Array.isArray(value)) {
+            return value.length === 0;
+        } else {
+            return value === '' || value == null;
+        }
+    }
 }
