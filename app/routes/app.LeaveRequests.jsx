@@ -1,18 +1,16 @@
 import { Text, Card } from '@shopify/polaris';
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
-import { store } from '../valtio/store';
-import { useSnapshot } from 'valtio';
 import { useNavigate } from '@remix-run/react';
+import { useSnapshot } from 'valtio';
+import { store } from '../valtio/store';
 import { verifyUser } from '../components/authentications/verifyUser';
 import Loader from '../components/Loader';
-import MyLeaveComponent from '../components/MyLeave/MyLeaveComponent';
 
-export default function MyLeaves() {
+export default function LeaveRequests() {
     const snap = useSnapshot(store)
     const navigate = useNavigate();
     const [isVerified, setVerified] = useState(false)
-    
 
     useEffect(() => {
 
@@ -37,10 +35,11 @@ export default function MyLeaves() {
         <>
             {!isVerified ? <Loader /> :
                 <Header
-                    title={"My Leave"}
-                    type="myLeave"
+                    title={"Leave Requests"}
                     component={
-                        <MyLeaveComponent />
+                        <Text>
+                            Leave Requests body
+                        </Text>
                     }
                 />
             }

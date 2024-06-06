@@ -41,6 +41,11 @@ export default function App() {
         >
           Shift Records
         </Link>}
+        {snap.user.isAdmin && snap.user.isLoggedIn && <Link
+          to="/app/leaveRequests"
+        >
+          Leave Requests
+        </Link>}
       </NavMenu>
       <Outlet />
       <ToastExample />

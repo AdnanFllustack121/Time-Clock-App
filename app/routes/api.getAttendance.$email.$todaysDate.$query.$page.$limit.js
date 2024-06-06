@@ -26,7 +26,7 @@ export const loader = async ({ params, request }) => {
 
         if (params.email !== 'false') {
 
-
+            // old code working fine but not sorted
             const gotData = await AttendanceModel.find({
                 storeURL: session.shop,
                 email: params.email,
@@ -42,6 +42,8 @@ export const loader = async ({ params, request }) => {
                     return d
                 }
             })
+
+
 
         } else {
             // console.log('hit else getAttendance');
@@ -181,6 +183,10 @@ export const loader = async ({ params, request }) => {
                     $match: { "in_time": dateFilter }
                 });
             }
+
+            basePipeline.push({
+                $sort: { "in_time": -1 }
+            });
 
             const countPipeline = [
                 ...basePipeline,

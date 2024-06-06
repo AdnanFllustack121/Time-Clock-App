@@ -229,12 +229,12 @@ function EmployeeClockInOut() {
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'center' }} >
-        <Text variant="headingXl" as="h4">
-          Clock-in/Clock-out
+        <Text variant="headingXl" as="h4" >
+          <span className='headingTextColor'>Clock-in/Clock-out</span>
         </Text>
       </div>
       <div className="card-container">
-        <div className="card">
+        <div className="card" style={{borderRadius:'40px'}}>
           {
             isLoadingClockInCard
               ?
@@ -267,7 +267,10 @@ function EmployeeClockInOut() {
                       tone='success'
                       loading={isLoadingButton}
                     >
-                      Clock In
+                      <p className='clockin-out-text'>
+                        Clock In
+                      </p>
+
                     </Button>
                   ) : (
                     <Button
@@ -279,7 +282,9 @@ function EmployeeClockInOut() {
                       tone='critical'
                       loading={isLoadingButton}
                     >
-                      Clock Out
+                      <p className='clockin-out-text'>
+                        Clock Out
+                      </p>
                     </Button>
                   )}
                 </div>
@@ -298,7 +303,7 @@ function EmployeeClockInOut() {
       </div>
       <div className='clockTableHeading'>
         <Text variant="headingXl" as="h4">
-          Today's clock-in and clock-out records
+          <span className='headingTextColor'>Today's clock-in and clock-out records</span>
         </Text>
       </div>
       <div className='table-container'>

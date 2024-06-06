@@ -15,6 +15,7 @@ export default function ModalComponent({ isTrue, toggleModal, handlePrimaryActio
             primaryAction={{
                 content: primaryContent,
                 onAction: handlePrimaryAction,
+                destructive: type === 'delete' ? true : false
             }}
             secondaryActions={[
                 {

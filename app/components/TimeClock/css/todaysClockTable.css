@@ -4,3 +4,22 @@
     margin: 30px 0px 20px 0px;
 
 }
+
+.typeBG {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 63px;
+    border-radius: 9px;
+    border: 1px;
+    height: 23px;
+
+}
+
+.typeText {
+    font-weight: 600;
+}
+
+.statusText {
+    font-weight: 600;
+}

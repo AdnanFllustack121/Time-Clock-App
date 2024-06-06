@@ -38,13 +38,13 @@ export default function EmployeeShiftRecords() {
             isInitialRender.current = false;
             return;
         }
-        console.log('totalPages', totalPages);
+        // console.log('totalPages', totalPages);
         // if (queryValue.length > 0 && queryValue.length < 2 ) setCurrentQueryPage(1)
         // if (queryValue.length < 1 && queryValue.length < 1) setCurrentPage(1)
 
         fetchShiftRecords();
-        console.log('currentPage', currentPage);
-        console.log('currentQueryPage', currentQueryPage);
+        // console.log('currentPage', currentPage);
+        // console.log('currentQueryPage', currentQueryPage);
     }, [currentPage, queryValue, currentQueryPage, dateFilter,]);
 
 
@@ -60,7 +60,7 @@ export default function EmployeeShiftRecords() {
 
         try {
             const queryParams = JSON.stringify(query)
-            console.log('queryParams', queryParams);
+            // console.log('queryParams', queryParams);
 
             const response = await fetch(`/api/getAttendance/${false}/${false}/${queryParams}/
             ${page}/${itemsPerPage}`, {
@@ -95,7 +95,9 @@ export default function EmployeeShiftRecords() {
 
             <div className='clockTableHeading'>
                 <Text variant="headingXl" as="h4">
-                    Employees shift records
+                    <span className='headingTextColor'>
+                        Employees shift records
+                    </span>
                 </Text>
             </div>
 

@@ -49,6 +49,11 @@
   animation: clockOutAnimation 0.5s ease-in-out;
 }
 
+.clockin-out-text {
+  font-size: 15px;
+  font-weight: 500;
+}
+
 .spacing-dateAndTime {
   margin-top: 6px;
 }
@@ -105,6 +110,17 @@
 
 .clockTableHeading {
   margin-top: 5rem;
+  margin-bottom: 1rem;
   display: flex;
   justify-content: center;
+}
+
+.apply_button {
+  width: 92%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.headingTextColor {
+  color: #524C42;
 }

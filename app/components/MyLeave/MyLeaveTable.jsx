@@ -3,48 +3,19 @@ import {
     IndexTable,
     Box,
     SkeletonBodyText,
-    Text,
-    Button,
     Icon,
-    Divider,
-    Tooltip, useSetIndexFiltersMode, IndexFilters, TextField
+    useSetIndexFiltersMode, IndexFilters, TextField, Text, ButtonGroup, Button, Tooltip
 } from '@shopify/polaris';
-import { ChatIcon } from '@shopify/polaris-icons';
-import moment from 'moment';
 import '../TimeClock/css/todaysClockTable.css'
+import { DeleteIcon, EditIcon, ChatIcon } from '@shopify/polaris-icons';
 import { showToast } from '../Toast';
+import moment from 'moment'
 
-function formatTime(time) {
-    return moment(time).format('HH:mm:ss');
-}
 
-function calculateDuration(inTime, outTime, forTotal, shiftRecords) {
-    let diffInMilliseconds = 0
-    // console.log('inTime, outTime', inTime, outTime);
-    if (forTotal) {
-        shiftRecords.forEach(({ in_time, out_time }) => {
-            if (out_time) {
-                diffInMilliseconds += new Date(out_time) - new Date(in_time);
-            }
-        });
-    } else {
-        if (outTime) diffInMilliseconds = Math.abs(new Date(outTime) - new Date(inTime));
-    }
+export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurrentPage, setCurrentQueryPage, totalPages,
+    hasNextPage, hasPrevPage, setQueryValue, queryValue, setDateFilter, dateFilter, toggleActionModal, calculateItemNumber }) {
 
-    // console.log('diffInMilliseconds',diffInMilliseconds);
-    const hours = Math.floor(diffInMilliseconds / 3600000);
-    const minutes = Math.floor((diffInMilliseconds % 3600000) / 60000);
-    const seconds = Math.floor((diffInMilliseconds % 60000) / 1000);
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setCurrentPage, setCurrentQueryPage, totalPages,
-    hasNextPage, hasPrevPage, calculateItemNumber, setQueryValue, queryValue, setDateFilter, dateFilter }) {
-    const [totalDuration, setTotalDuration] = useState("--");
     const { mode, setMode } = useSetIndexFiltersMode();
-    const [itemStrings, setItemStrings] = useState([
-        'Generate Report',
-    ]);
 
     const handleSelectingStartDate = (_v) => {
         setDateFilter((prev) => ({ ...prev, startDate: _v }))
@@ -54,6 +25,8 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
         if (!dateFilter.startDate) return showToast('Please select a start date first.')
         setDateFilter((prev) => ({ ...prev, endDate: _v }))
     }
+
+    const handleFiltersQueryChange = useCallback((value) => setQueryValue(value), []);
 
     const filters = [
         {
@@ -82,20 +55,6 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
             ),
             shortcut: true,
         },
-        // {
-        //     key: 'RecordsOF',
-        //     label: 'End date',
-        //     filter: (
-        //         <TextField
-        //             value={dateFilter.endDate}
-        //             onChange={handleSelectingEndDate}
-        //             autoComplete="off"
-        //             type='date'
-        //         />
-        //     ),
-        //     shortcut: true,
-        // },
-
     ];
 
     const removeStartDateFilter = () => {
@@ -131,41 +90,84 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
     }
     ]
 
-    const tabs = itemStrings.map((item, index) => ({
-        content: item,
-        index,
-        onAction: () => { console.log('hit generate report'); },
+    const statusTextColor = {
+        Pending: 'rgb(208, 208, 90)',
+        Approved: 'rgb(80 148 95)',
+        Rejected: 'rgb(208 90 90)'
+    }
 
-    }));
+    const typeBGColor = {
+        Festival: '#CAF4FF',
+        Casual: '#ACE1AF',
+        Sick: '#FFD0D0'
+    }
 
-    const handleFiltersQueryChange = useCallback((value) => setQueryValue(value), []);
+    const typeTextColor = {
+        Festival: '#006989',
+        Casual: '#0A6847',
+        Sick: '#EE4E4E'
+
+    }
 
 
-    useEffect(() => {
-        if (!isLoadingTable) {
-            const totalDurationString = calculateDuration('', '', true, shiftRecords);
-            setTotalDuration(totalDurationString);
-        }
-    }, [shiftRecords, isLoadingTable]);
 
-    const rowMarkup = shiftRecords.length <= 0 ? [] : shiftRecords?.map(({ _id, in_time, out_time, note, userDetails }, i) => (
-        <IndexTable.Row key={_id}>
-            <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{calculateItemNumber(i)}</Text></IndexTable.Cell>
-            <IndexTable.Cell>{`${userDetails?.firstName} ${userDetails?.lastName}`}</IndexTable.Cell>
-            <IndexTable.Cell>{moment(in_time).format('MMM DD, YYYY')}</IndexTable.Cell>
-            <IndexTable.Cell>{formatTime(in_time)}</IndexTable.Cell>
-            <IndexTable.Cell>{out_time ? moment(out_time).format('MMM DD, YYYY') : "--"}</IndexTable.Cell>
-            <IndexTable.Cell>{out_time ? formatTime(out_time) : "--"}</IndexTable.Cell>
-            <IndexTable.Cell>
-                <Tooltip dismissOnMouseOut content={note ?? '---'}>
-                    <Button
-                        icon={<Icon source={ChatIcon} />}
-                    />
-                </Tooltip>
-            </IndexTable.Cell>
-            <IndexTable.Cell>{calculateDuration(in_time, out_time)}</IndexTable.Cell>
-        </IndexTable.Row>
-    ));
+
+
+    const rowMarkup =
+        myLeaveRecords.length <= 0 ? [] : myLeaveRecords?.map(({ _id, startDate, endDate, reason, type, createdAt, status }, i) => {
+
+            const differenceInMilliseconds = new Date(endDate) - new Date(startDate);
+            // console.log('differecencemillicsescjnds', differenceInMilliseconds);
+            const millisecondsInDay = 1000 * 60 * 60 * 24;
+
+            const days = Math.floor(differenceInMilliseconds / millisecondsInDay);
+            return (
+                <IndexTable.Row key={_id}>
+                    <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{calculateItemNumber(i)}</Text></IndexTable.Cell>
+                    <IndexTable.Cell>{endDate ? `${days + 1}  ${days + 1 === 1 ? 'day' : 'days'}` : '1 day'}</IndexTable.Cell>
+                    <IndexTable.Cell>{moment(startDate).format('DD-MMM-YYYY')}</IndexTable.Cell>
+                    <IndexTable.Cell>{endDate ? moment(endDate).format('DD-MMM-YYYY') : '--'}</IndexTable.Cell>
+                    <IndexTable.Cell>
+                        <div className='typeBG' style={{ backgroundColor: typeBGColor[type] }}>
+                            <p className='typeText' style={{ color: typeTextColor[type] }}>
+                                {type}
+                            </p>
+                        </div>
+                    </IndexTable.Cell>
+                    <IndexTable.Cell>{moment(createdAt).format('DD-MMM-YYYY, HH:mm:ss')}</IndexTable.Cell>
+                    <IndexTable.Cell>
+                        <Tooltip dismissOnMouseOut content={reason ?? '---'}>
+                            <Button
+                                icon={<Icon source={ChatIcon} />}
+                            />
+                        </Tooltip>
+                    </IndexTable.Cell>
+                    <IndexTable.Cell>
+                        <p className='statusText' style={{ color: statusTextColor[status] }}>
+                            {status}
+                        </p>
+                    </IndexTable.Cell>
+                    <IndexTable.Cell>
+                        {status === 'Pending' && <ButtonGroup>
+                            <Button
+                                icon={<Icon source={EditIcon} />}
+                                onClick={() => {
+                                    toggleActionModal(_id, 'edit')
+                                }}
+                            />
+                            <Button
+                                icon={<Icon source={DeleteIcon} />}
+                                onClick={() => {
+                                    toggleActionModal(_id, 'delete')
+                                }}
+                                tone='critical'
+                            />
+                        </ButtonGroup>}
+                    </IndexTable.Cell>
+
+                </IndexTable.Row>
+            )
+        });
 
     return (
         <div className='table' style={{
@@ -179,7 +181,7 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
                 <>
                     <IndexFilters
                         queryValue={queryValue}
-                        queryPlaceholder="Searching in employee name"
+                        queryPlaceholder="Searching in reason"
                         onQueryChange={handleFiltersQueryChange}
                         onQueryFocus={() => setCurrentQueryPage(1)}
                         cancelAction={{
@@ -189,8 +191,8 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
                         }}
                         onQueryClear={() => {
                             setQueryValue('')
+
                         }}
-                        // tabs={tabs}
                         tabs={[]}
                         filters={filters}
                         appliedFilters={appliedFilters}
@@ -200,16 +202,17 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
                         setMode={setMode}
                     />
                     <IndexTable
-                        itemCount={shiftRecords?.length ?? 0}
+                        itemCount={myLeaveRecords?.length ?? 0}
                         headings={[
                             { title: 'No.' },
-                            { title: 'Employee Name.' },
-                            { title: 'In Date' },
-                            { title: 'In Time' },
-                            { title: 'Out Date' },
-                            { title: 'Out Time' },
-                            { title: 'Note' },
                             { title: 'Duration' },
+                            { title: 'Start Date' },
+                            { title: 'End Date' },
+                            { title: 'Leave Type' },
+                            { title: 'Created at' },
+                            { title: 'Reason' },
+                            { title: 'status' },
+                            { title: 'action' },
                         ]}
                         selectable={false}
                         pagination={{
@@ -238,18 +241,7 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
                 </>
 
             }
-            {shiftRecords.length > 0 && (dateFilter.startDate || dateFilter.endDate) && <><Divider />
-                <div className='total_hours'>
-                    <Text variant="headingMd" as="h6">{`Total Hours: ${totalDuration}`}</Text>
-                </div></>}
         </div>
     );
 
-    function isEmpty(value) {
-        if (Array.isArray(value)) {
-            return value.length === 0;
-        } else {
-            return value === '' || value == null;
-        }
-    }
 }
