@@ -2,11 +2,12 @@ import { Toast, Frame } from '@shopify/polaris';
 import { useSnapshot } from 'valtio';
 import { store } from '../valtio/store';
 
-export const showToast = (message) => {
+export const showToast = (message, isError = false) => {
     // console.log('from showToast', store.toast)
+    console.log('isError from showTaost', isError);
     store.toast = {
         ...store.toast,
-        error: false,
+        error: isError,
         active: true,
         message: message
     };

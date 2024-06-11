@@ -6,6 +6,7 @@ import { useSnapshot } from 'valtio';
 import { store } from '../valtio/store';
 import { verifyUser } from '../components/authentications/verifyUser';
 import Loader from '../components/Loader';
+import LeaveRequestsComponent from '../components/LeaveRequest/LeaveRequestsComponent';
 
 export default function LeaveRequests() {
     const snap = useSnapshot(store)
@@ -37,9 +38,7 @@ export default function LeaveRequests() {
                 <Header
                     title={"Leave Requests"}
                     component={
-                        <Text>
-                            Leave Requests body
-                        </Text>
+                        <LeaveRequestsComponent />
                     }
                 />
             }

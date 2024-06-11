@@ -1,7 +1,8 @@
-import { Modal, TextField } from '@shopify/polaris';
+import { Modal, TextField, FormLayout } from '@shopify/polaris';
 import { useState, useCallback } from 'react';
 
-export default function ModalComponent({ isTrue, toggleModal, handlePrimaryAction, primaryContent, secondaryContent, sectionContent, type, value, setValue }) {
+export default function ModalComponent({ isTrue, toggleModal, handlePrimaryAction, primaryContent, secondaryContent, sectionContent,
+    type, value, setValue, handleAdminInputChange, isLoadingButton = false }) {
 
     const handleChange = (val) => {
         setValue(val)
@@ -11,11 +12,12 @@ export default function ModalComponent({ isTrue, toggleModal, handlePrimaryActio
         <Modal
             open={isTrue}
             onClose={toggleModal}
-            title={type === "reason" ? sectionContent : "Confirmation"}
+            title={type === "reason" ? sectionContent : type === "adminClockOut" ? 'Please fill all the fields correctly.' : "Confirmation"}
             primaryAction={{
                 content: primaryContent,
                 onAction: handlePrimaryAction,
-                destructive: type === 'delete' ? true : false
+                destructive: type === 'delete' ? true : false,
+                loading: isLoadingButton
             }}
             secondaryActions={[
                 {
@@ -25,6 +27,33 @@ export default function ModalComponent({ isTrue, toggleModal, handlePrimaryActio
             ]}
         >
             <Modal.Section>
+                {type === "adminClockOut" &&
+                    <>
+                        <FormLayout>
+                            <FormLayout.Group condensed>
+                                <TextField
+                                    label="Select a date and time:"
+                                    value={value.out_time}
+                                    onChange={(_v) => handleAdminInputChange(_v, 'out_time')}
+                                    type='datetime-local'
+                                    autoComplete="off"
+                                />
+                                <input style={{ visibility: 'hidden' }} />
+                                <input style={{ visibility: 'hidden' }} />
+                            </FormLayout.Group>
+                        </FormLayout>
+
+                        <div style={{ marginTop: '10px' }} />
+
+                        <TextField
+                            label="Note:"
+                            value={value.note}
+                            onChange={(_v) => handleAdminInputChange(_v, 'note')}
+                            multiline={4}
+                            autoComplete="off"
+                        />
+                    </>
+                }
 
                 {type === "reason" ?
                     <>
@@ -36,7 +65,7 @@ export default function ModalComponent({ isTrue, toggleModal, handlePrimaryActio
                             autoComplete="off"
                         />
                     </>
-                    : sectionContent
+                    : type === "adminClockOut" ? '' : sectionContent
                 }
             </Modal.Section>
         </Modal>

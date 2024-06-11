@@ -65,7 +65,7 @@ export default function MyLeaveComponent() {
   const fetchMyLeaveRecords = async () => {
     // console.log('hit fetchMyLeaveRecords');
     const query = {
-      queryReason: queryValue.length > 0 ? queryValue : 'All',
+      queryKeyword: queryValue.length > 0 ? queryValue : 'All',
       startDate: dateFilter.startDate ? moment(dateFilter.startDate).format('MMM DD, YYYY') : false,
       endDate: dateFilter.endDate ? moment(dateFilter.endDate).format('MMM DD, YYYY') : false
     }
@@ -287,7 +287,7 @@ export default function MyLeaveComponent() {
 
       <div className='clockTableHeading' style={{ marginBottom: '0rem' }}>
         <Text variant="headingXl" as="h4">
-          <span className='headingTextColor'>Applied Leave request records</span>
+          <span className='headingTextColor'>Applied Leaves records</span>
         </Text>
       </div>
       <div className="apply_button">

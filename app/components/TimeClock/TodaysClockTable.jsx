@@ -6,7 +6,7 @@ import {
   Text,
   ButtonGroup,
   Button,
-  Icon,
+  Icon, Tooltip,
   Divider
 } from '@shopify/polaris';
 import { ChatIcon } from '@shopify/polaris-icons';
@@ -14,7 +14,7 @@ import moment from 'moment';
 import './css/todaysClockTable.css';
 
 function formatTime(time) {
-  return moment(time).format('HH:mm:ss');
+  return moment(time).format('hh:mm:ss A');
 }
 
 function calculateDuration(inTime, outTime, forTotal, todaysAttendance) {
@@ -56,11 +56,13 @@ export default function TodaysClockTable({ todaysAttendance, isLoadingClockInCar
       <IndexTable.Cell>{out_time ? formatTime(out_time) : "--"}</IndexTable.Cell>
       <IndexTable.Cell>
         <ButtonGroup>
-          {note}
-          <Button
-            icon={<Icon source={ChatIcon} />}
-            onClick={() => handleViewNote(_id, note)}
-          />
+          <Tooltip dismissOnMouseOut content={note ?? '---'}>
+            <Button
+              icon={<Icon source={ChatIcon} />}
+              disabled={out_time ? false : true}
+              onClick={() => handleViewNote(_id, note)}
+            />
+          </Tooltip>
         </ButtonGroup>
       </IndexTable.Cell>
       <IndexTable.Cell>{calculateDuration(in_time, out_time)}</IndexTable.Cell>

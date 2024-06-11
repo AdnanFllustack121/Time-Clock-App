@@ -4,16 +4,16 @@ import {
     Box,
     SkeletonBodyText,
     Icon,
-    useSetIndexFiltersMode, IndexFilters, TextField, Text, ButtonGroup, Button, Tooltip
+    useSetIndexFiltersMode, IndexFilters, TextField, Text, ButtonGroup, Button, Tooltip, Divider
 } from '@shopify/polaris';
 import '../TimeClock/css/todaysClockTable.css'
-import { DeleteIcon, EditIcon, ChatIcon } from '@shopify/polaris-icons';
+import { XIcon, CheckIcon, ChatIcon } from '@shopify/polaris-icons';
 import { showToast } from '../Toast';
 import moment from 'moment'
 
 
-export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurrentPage, setCurrentQueryPage, totalPages,
-    hasNextPage, hasPrevPage, setQueryValue, queryValue, setDateFilter, dateFilter, toggleActionModal, calculateItemNumber }) {
+export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable, setCurrentPage, setCurrentQueryPage, totalPages,
+    hasNextPage, hasPrevPage, setQueryValue, queryValue, setDateFilter, dateFilter, calculateItemNumber, toggleActionModal }) {
 
     const { mode, setMode } = useSetIndexFiltersMode();
 
@@ -109,12 +109,8 @@ export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurren
 
     }
 
-
-
-
-
     const rowMarkup =
-        myLeaveRecords.length <= 0 ? [] : myLeaveRecords?.map(({ _id, startDate, endDate, reason, type, createdAt, status }, i) => {
+        leaveRequestRecords.length <= 0 ? [] : leaveRequestRecords?.map(({ _id, startDate, endDate, reason, type, createdAt, status, userDetails }, i) => {
 
             const differenceInMilliseconds = new Date(endDate) - new Date(startDate);
             // console.log('differecencemillicsescjnds', differenceInMilliseconds);
@@ -124,8 +120,9 @@ export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurren
             return (
                 <IndexTable.Row key={_id}>
                     <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{calculateItemNumber(i)}</Text></IndexTable.Cell>
+                    <IndexTable.Cell>{`${userDetails.firstName} ${userDetails.lastName}`}</IndexTable.Cell>
                     <IndexTable.Cell>{endDate ? `${days + 1}  ${days + 1 === 1 ? 'day' : 'days'}` : '1 day'}</IndexTable.Cell>
-                    <IndexTable.Cell>{`${moment(startDate).format('DD-MMM-YYYY')} ${endDate ? `to ${moment(endDate).format('DD-MMM-YYYY')}` : ''} `}</IndexTable.Cell>
+                    <IndexTable.Cell>{`${moment(startDate).format('DD-MMM-YYYY')} ${endDate ? `to ${moment(endDate).format('DD-MMM-YYYY')}` : ''}`}</IndexTable.Cell>
                     <IndexTable.Cell>
                         <div className='typeBG' style={{ backgroundColor: typeBGColor[type] }}>
                             <p className='typeText' style={{ color: typeTextColor[type] }}>
@@ -147,22 +144,35 @@ export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurren
                         </p>
                     </IndexTable.Cell>
                     <IndexTable.Cell>
-                        {status === 'Pending' && <ButtonGroup>
-                            <Button
-                                icon={<Icon source={EditIcon} />}
-                                onClick={() => {
-                                    toggleActionModal(_id, 'edit')
-                                }}
-                            />
-                            <Button
-                                icon={<Icon source={DeleteIcon} />}
-                                onClick={() => {
-                                    toggleActionModal(_id, 'delete')
-                                }}
-                                tone='critical'
-                            />
-                        </ButtonGroup>}
+                        {status === 'Pending' && (
+                            <div className='approveRejectBtn'>
+                                <Button
+                                    variant="primary"
+                                    tone="success"
+                                    icon={<Icon source={CheckIcon} />}
+                                    onClick={() => {
+                                        toggleActionModal(_id, 'approve');
+                                    }}
+                                >
+                                    Approve
+                                </Button>
+                                <div style={{ marginBottom: '5px' }}></div>
+                                <Button
+                                    variant="primary"
+                                    tone="critical"
+                                    icon={<Icon source={XIcon} />}
+                                    onClick={() => {
+                                        toggleActionModal(_id, 'reject');
+                                    }}
+                                    style={{ alignSelf: 'flex-end' }}
+                                >
+                                    Reject
+                                </Button>
+
+                            </div>
+                        )}
                     </IndexTable.Cell>
+
 
                 </IndexTable.Row>
             )
@@ -180,7 +190,7 @@ export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurren
                 <>
                     <IndexFilters
                         queryValue={queryValue}
-                        queryPlaceholder="Searching in reason"
+                        queryPlaceholder="Searching in name"
                         onQueryChange={handleFiltersQueryChange}
                         onQueryFocus={() => setCurrentQueryPage(1)}
                         cancelAction={{
@@ -201,9 +211,10 @@ export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurren
                         setMode={setMode}
                     />
                     <IndexTable
-                        itemCount={myLeaveRecords?.length ?? 0}
+                        itemCount={leaveRequestRecords?.length ?? 0}
                         headings={[
                             { title: 'No.' },
+                            { title: 'Name' },
                             { title: 'Duration' },
                             { title: 'Date' },
                             { title: 'Leave Type' },

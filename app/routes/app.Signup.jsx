@@ -7,7 +7,7 @@ import {
     TextField,
     Card,
     Page,
-    Checkbox,
+    Checkbox,Link,
 } from "@shopify/polaris";
 import Placeholder from "../components/placeholder";
 import { showToast } from "../components/Toast";
@@ -106,22 +106,22 @@ export default function Signup() {
                 !notEmptyRegex.test(email) ||
                 !notEmptyRegex.test(password) ||
                 !notEmptyRegex.test(confirmPassword)) {
-                showToast("Fields shouldn't be empty");
+                showToast("Fields shouldn't be empty", true);
                 return;
             }
 
             if (!emailRegex.test(email)) {
-                showToast("Please enter a valid email");
+                showToast("Please enter a valid email", true);
                 return;
             }
 
             if (!passwordRegex.test(password) || !passwordRegex.test(confirmPassword)) {
-                showToast("Password must be at least 8 characters long");
+                showToast("Password must be at least 8 characters long", true);
                 return;
             }
 
             if (password !== confirmPassword) {
-                showToast("Password doesn't match!");
+                showToast("Password doesn't match!", true);
                 return;
             }
             console.log(' snap.user.isUserDocEmpty', snap.user.isUserDocEmpty);
@@ -146,7 +146,7 @@ export default function Signup() {
             if (!response.ok) {
                 const errorData = await response.json();
                 const errorMessage = errorData?.message || "Signup failed. Please check your details.";
-                showToast(errorMessage);
+                showToast(errorMessage, true);
             } else {
                 const { message, token, user } = await response.json();
                 if (token) {
@@ -312,7 +312,7 @@ export default function Signup() {
                                     />
 
 
-                                    <Placeholder
+                                    {/* <Placeholder
                                         component={
                                             <div style={{ width: '25%' }}>
                                                 <Button fullWidth loading={isLoading} size="large" primary onClick={handleSubmit} >
@@ -328,6 +328,25 @@ export default function Signup() {
                                         width='auto'
                                         marginBottom='0px'
                                         itemsCentered={true}
+                                    /> */}
+
+                                    <Placeholder
+                                        component={
+                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                <Button loading={isLoading} size="large" primary onClick={handleSubmit} >
+                                                    Submit
+                                                </Button>
+                                                <Link url="/app/Login">Already have an account.</Link>
+
+                                            </div>
+
+                                        }
+                                        marginTop='12px'
+                                        padding='auto'
+                                        height='auto'
+                                        width='auto'
+                                        marginBottom='0px'
+                                        itemsCentered={false}
                                     />
 
                                 </FormLayout>

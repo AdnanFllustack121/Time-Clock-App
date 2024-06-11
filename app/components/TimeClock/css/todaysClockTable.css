@@ -23,3 +23,10 @@
 .statusText {
     font-weight: 600;
 }
+
+.approveRejectBtn {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 60%
+}

@@ -1,13 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Text } from '@shopify/polaris'
-import EmployeesClockTable from './EmployeesClockTable'
-import TestComponent from '../TestComponent'
+import { Text, Button } from '@shopify/polaris'
+import { PlusIcon } from '@shopify/polaris-icons';
+import LeaveRequestsTable from './LeaveRequestsTable';
 import '../TimeClock/css/EmployeeClockInOut.css'
+import { showToast } from '../Toast';
+import { useSnapshot } from 'valtio';
+import { store } from '../../valtio/store';
+import ModalComponent from '../ModalComponent';
 import moment from 'moment'
 
-
-export default function EmployeeShiftRecords() {
-    const [shiftRecords, setShiftRecords] = useState([])
+export default function LeaveRequestsComponent() {
+    const [leaveRequestRecords, setLeaveRequestRecords] = useState([])
     const [isLoadingTable, setLoadingTable] = useState(false)
     const [currentPage, setCurrentPage] = useState(1);
     const [currentQueryPage, setCurrentQueryPage] = useState(1)
@@ -20,14 +23,14 @@ export default function EmployeeShiftRecords() {
         startDate: '',
         endDate: ''
     })
-
+    const [confirmationModal, setConfirmationModal] = useState(false)
+    const [actionID, setActionID] = useState('')
     const isInitialRender = useRef(true);
-
 
     useEffect(() => {
         const fetchOnlyFirstTime = async () => {
             setLoadingTable(true)
-            await fetchShiftRecords()
+            await fetchLeaveRequestRecords()
             setLoadingTable(false)
         }
         fetchOnlyFirstTime()
@@ -39,19 +42,16 @@ export default function EmployeeShiftRecords() {
             return;
         }
         // console.log('totalPages', totalPages);
-        // if (queryValue.length > 0 && queryValue.length < 2 ) setCurrentQueryPage(1)
-        // if (queryValue.length < 1 && queryValue.length < 1) setCurrentPage(1)
-
-        fetchShiftRecords();
+        fetchLeaveRequestRecords();
         // console.log('currentPage', currentPage);
         // console.log('currentQueryPage', currentQueryPage);
     }, [currentPage, queryValue, currentQueryPage, dateFilter,]);
 
 
-    const fetchShiftRecords = async () => {
-        // console.log('hit fetchShiftRecords');
+    const fetchLeaveRequestRecords = async () => {
+        console.log('hit fetchLeaveRequestRecords');
         const query = {
-            queryName: queryValue.length > 0 ? queryValue : 'All',
+            queryKeyword: queryValue.length > 0 ? queryValue : 'All',
             startDate: dateFilter.startDate ? moment(dateFilter.startDate).format('MMM DD, YYYY') : false,
             endDate: dateFilter.endDate ? moment(dateFilter.endDate).format('MMM DD, YYYY') : false
         }
@@ -60,10 +60,10 @@ export default function EmployeeShiftRecords() {
 
         try {
             const queryParams = JSON.stringify(query)
-            // console.log('queryParams', queryParams);
+            console.log('queryParams from leaveRequestsComponent', queryParams);
 
-            const response = await fetch(`/api/getAttendance/${false}/${false}/${queryParams}/
-            ${page}/${itemsPerPage}`, {
+            const response = await fetch(`/api/getAppliedLeave/${false}/${queryParams}/
+          ${page}/${itemsPerPage}`, {
                 method: 'get',
                 headers: {
                     "Content-Type": "application/json",
@@ -71,10 +71,11 @@ export default function EmployeeShiftRecords() {
             })
 
             if (response.ok) {
-                const { message, attendanceData, hasNextPageS, hasPrevPageS, totalItemsS, limit } = await response.json()
-                setShiftRecords(attendanceData)
+                const { message, data, hasNextPageS, hasPrevPageS, totalItemsS, limit } = await response.json()
+                setLeaveRequestRecords(data)
                 setHasNextPage(hasNextPageS)
                 setHasPrevPage(hasPrevPageS)
+                // console.log('data from myleavecomponent', data);
                 // console.log('Math.ceil(totalItemsS / limit)', Math.ceil(totalItemsS / limit));
                 setTotalPages(Math.ceil(totalItemsS / limit));
 
@@ -89,44 +90,53 @@ export default function EmployeeShiftRecords() {
         return (queryValue.length > 0 ? currentQueryPage - 1 : currentPage - 1) * itemsPerPage + index + 1;
     };
 
+    const toggleActionModal = (type) => {
+        console.log('action type', type);
+    }
+
 
     return (
         <>
 
-            <div className='clockTableHeading'>
+            <div className='clockTableHeading' style={{ marginBottom: '1.5rem' }}>
                 <Text variant="headingXl" as="h4">
-                    <span className='headingTextColor'>
-                        Employees shift records
-                    </span>
+                    <span className='headingTextColor'>Employee Leaves requests</span>
                 </Text>
             </div>
-
             <div className='table-container'>
 
                 <div className='card-table'>
+
                     <section style={{ display: 'block' }}>
-                        <EmployeesClockTable
-                            shiftRecords={shiftRecords}
+                        <LeaveRequestsTable
+                            leaveRequestRecords={leaveRequestRecords}
                             isLoadingTable={isLoadingTable}
                             setCurrentPage={setCurrentPage}
                             setCurrentQueryPage={setCurrentQueryPage}
                             totalPages={totalPages}
                             hasNextPage={hasNextPage}
                             hasPrevPage={hasPrevPage}
-                            calculateItemNumber={calculateItemNumber}
                             setQueryValue={setQueryValue}
                             queryValue={queryValue}
                             setDateFilter={setDateFilter}
                             dateFilter={dateFilter}
-                            setShiftRecords={setShiftRecords}
+                            calculateItemNumber={calculateItemNumber}
+                            toggleActionModal={toggleActionModal}
                         />
                     </section>
                 </div>
 
             </div>
 
-
-
+            <ModalComponent
+                isTrue={confirmationModal}
+                toggleModal={() => { }}
+                handlePrimaryAction={() => { }}
+                type={"delete"}
+                primaryContent={"Delete"}
+                secondaryContent={"Cancel"}
+                sectionContent={'Are you sure you want to delete.'}
+            />
 
         </>
     )

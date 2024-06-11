@@ -18,7 +18,7 @@ const verifyToken = (token, secret) => {
 export const action = async ({ request }) => {
     const data = JSON.parse(await request.text());
     const { token } = data;
-    console.log('data get from verifyUser', token);
+    // console.log('data get from verifyUser', token);
     let isUserDocEmpty;
 
     try {
@@ -31,18 +31,18 @@ export const action = async ({ request }) => {
             isUserDocEmpty = true
         }
 
-        console.log('session.shop of api verifyUser.............', session.shop);
+        // console.log('session.shop of api verifyUser.............', session.shop);
 
         if (!token || token === "" || token === undefined) {
             return json({ status: false, isUserDocEmpty });
         }
 
-        console.log('process.env.TOKEN_KEY and token.,,,..,,,..,,', process.env.TOKEN_KEY, '    ', token);
+        // console.log('process.env.TOKEN_KEY and token.,,,..,,,..,,', process.env.TOKEN_KEY, '    ', token);
 
         try {
             const decoded = await verifyToken(token, process.env.TOKEN_KEY);
             const user = await userModel.findById(decoded.id);
-            console.log('user..............found........', user);
+            // console.log('user..............found........', user);
 
             if (user) {
                 return json({ status: true, user, isUserDocEmpty });

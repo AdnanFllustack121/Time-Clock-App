@@ -11,7 +11,7 @@ import TodaysClockTable from './TodaysClockTable';
 
 function EmployeeClockInOut() {
   const [clockedIn, setClockedIn] = useState(false);
-  const [currentTime, setCurrentTime] = useState(moment().format('HH:mm:ss'));
+  const [currentTime, setCurrentTime] = useState(moment().format('hh:mm:ss A'));
   const [currentDate, setCurrentDate] = useState(moment().format('MMM DD, YYYY'));
   const [openNoteModal, setOpenNoteModal] = useState({
     isOpen: false,
@@ -26,7 +26,7 @@ function EmployeeClockInOut() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(moment().format('HH:mm:ss'));
+      setCurrentTime(moment().format('hh:mm:ss A'));
       setCurrentDate(moment().format('MMM DD, YYYY'))
     }, 1000);
     return () => clearInterval(timer);
@@ -69,10 +69,10 @@ function EmployeeClockInOut() {
     const apiData = {
       in_time: new Date(),
       email: snap.user.email,
-      status: 'incomplete',
+      status: 'Incomplete',
 
     }
-    console.log('in-time apiData', apiData);
+    // console.log('in-time apiData', apiData);
 
 
     try {
@@ -90,6 +90,7 @@ function EmployeeClockInOut() {
         setTodaysAttendance(prevAttendance => [...prevAttendance, attendanceData]);
         setClockedIn(true);
         showToast(message)
+
 
       }
 
@@ -116,7 +117,7 @@ function EmployeeClockInOut() {
     const apiData = {
       out_time: new Date(),
       email: snap.user.email,
-      status: "complete",
+      status: "Complete",
       note: note,
       idToUpdate
     }
@@ -223,8 +224,9 @@ function EmployeeClockInOut() {
     }
   }
 
-  const clockStartedTime = todaysAttendance[todaysAttendance?.length - 1]?.out_time ?
-    false : todaysAttendance[todaysAttendance.length - 1]?.in_time?.split(' ')[1]
+  const clockStartedTiming = (todaysAttendance[todaysAttendance?.length - 1]?.out_time || todaysAttendance[todaysAttendance?.length - 1]?.out_time === undefined) ?
+    false : todaysAttendance[todaysAttendance.length - 1]?.in_time
+
 
   return (
     <>
@@ -234,7 +236,7 @@ function EmployeeClockInOut() {
         </Text>
       </div>
       <div className="card-container">
-        <div className="card" style={{borderRadius:'40px'}}>
+        <div className="card" style={{ borderRadius: '40px' }}>
           {
             isLoadingClockInCard
               ?
@@ -253,7 +255,7 @@ function EmployeeClockInOut() {
                   {currentDate}
                 </Text>
                 <div className="spacing-dateAndTime" ></div>
-                <Text variant="headingLg" as="h5">
+                <Text variant="headingMd" as="h5">
                   {currentTime}
                 </Text>
                 <div className="button-wrapper">
@@ -291,8 +293,11 @@ function EmployeeClockInOut() {
                 <div className="spacing-clock-startedTime" ></div>
 
                 <Text variant="headingSm" as="h6">
-                  {clockStartedTime ? `Clock started at : ${clockStartedTime}` : 'Currently you are clocked-out'}
+                  {clockStartedTiming ? `Clock started at:` : 'Currently you are clocked-out'}
                 </Text>
+                {clockStartedTiming && <Text variant="headingSm" as="h5">
+                  {moment(clockStartedTiming).format('MMM DD, hh:mm:ss A')}
+                </Text>}
               </div>
           }
 

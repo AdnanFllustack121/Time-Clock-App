@@ -37,19 +37,19 @@ export default function Signup() {
 
             if (!notEmptyRegex.test(email) ||
                 !notEmptyRegex.test(password)) {
-                showToast("Fields shouldn't be empty");
+                showToast("Fields shouldn't be empty", true);
                 return;
             }
 
 
             if (!emailRegex.test(email)) {
-                showToast("Invalid email format");
+                showToast("Invalid email format", true);
                 return;
             }
 
 
             if (!passwordRegex.test(password)) {
-                showToast("Password must be at least 8 characters long");
+                showToast("Password must be at least 8 characters long", true);
                 return;
             }
             const newData = {
@@ -70,23 +70,21 @@ export default function Signup() {
             if (!response.ok) {
                 const errorData = await response.json();
                 const errorMessage = errorData?.message || "Login failed. Please check your details.";
-                showToast(errorMessage);
+                showToast(errorMessage, true);
             } else {
-                const { message, status, token } = await response.json();
+                const { message, status, error, token } = await response.json();
+                showToast(message, error);
                 if (status) {
                     console.log('message', message);
                     localStorage.setItem("time_clock_token", token);
                     setTimeout(() => {
                         navigate("/app");
                     }, 1000);
-                } else if (message) {
-                    console.log('message', message);
-                    showToast(message);
                 }
             }
         } catch (error) {
             console.error('error on login', error)
-            showToast("An unexpected error occurred. Please try again later.");
+            showToast(`An unexpected error occurred. Please try again later. error: ${error}`, true);
         } finally {
             setLoading(false)
         }

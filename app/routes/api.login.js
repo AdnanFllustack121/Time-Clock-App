@@ -22,7 +22,7 @@ export const action = async ({ request }) => {
         const userFound = await userModel.findOne({ email: email }).exec();
 
         if (!userFound) {
-            return json({ message: "You are not registered.", status: false });
+            return json({ message: "You are not registered.", error: true, status: false });
         }
 
         if (password && userFound.password) {
@@ -38,12 +38,12 @@ export const action = async ({ request }) => {
 
                 const token = await createSecretToken(userFound._id);
 
-                return json({ message: "Login success", user: userFound, token, status: true });
+                return json({ message: "You are logged in successfully", error: false, user: userFound, token, status: true });
             } else {
-                return json({ message: "Please enter correct password", status: false });
+                return json({ message: "Please enter correct password", error: true, status: false });
             }
         } else {
-            return json({ message: "Invalid request", status: false });
+            return json({ message: "Invalid request", error: true, status: false });
         }
 
 

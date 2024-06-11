@@ -22,34 +22,102 @@ export const loader = async ({ params, request }) => {
         let totalItems;
         let totalPages;
         let hasNextPage;
-        let hasPrevPage
+        let hasPrevPage;
 
-        const queryRegex = new RegExp(query.queryReason.replace(/\s+/g, '\\s*'), 'i');
+        const queryRegex = new RegExp(query.queryKeyword.replace(/\s+/g, '\\s*'), 'i');
 
-        const matchStage = (query.queryReason !== 'All') ? {
+        const matchStage = {
             storeURL: session.shop,
-            createdBy: params.email,
-            reason: {
-                $regex: queryRegex
-            }
-        } : {
-            storeURL: session.shop,
-            createdBy: params.email,
         };
+
+        if (params.email !== 'false') {
+            console.log('params.email hit');
+            matchStage.createdBy = params.email
+            if (query.queryKeyword !== 'All') {
+                console.log('hit all queryKeyword');
+                matchStage.reason = {
+                    $regex: queryRegex
+                }
+            }
+        } else {
+            console.log('params.email not hit');
+            matchStage.status = 'Pending'
+        }
+
+        console.log('matchStage', matchStage);
 
         const dateFilter = {};
         if (query.startDate) {
-            dateFilter.$gte = new Date(query.startDate);
+            const startDate = new Date(query.startDate);
+            startDate.setHours(0, 0, 0, 0);
+            dateFilter.$gte = startDate;
         }
         if (query.endDate) {
-            dateFilter.$lte = new Date(query.endDate);
+            const endDate = new Date(query.endDate);
+            endDate.setHours(23, 59, 59, 999);
+            dateFilter.$lte = endDate;
         }
 
         // console.log('dateFilter......', dateFilter);
-
         const basePipeline = [
-            { $match: matchStage }
+
+
         ];
+
+        if (params.email === 'false') {
+            console.log('hit param.email baseline push');
+            basePipeline.push(
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "createdBy",
+                        foreignField: "email",
+                        as: "userDetails"
+                    }
+                },
+                { $unwind: "$userDetails" }
+            )
+
+            if (query.queryKeyword !== 'All') {
+                console.log('hit not all not params.email queryRegex', queryRegex);
+                matchStage.$expr = {
+                    $regexMatch: {
+                        input: {
+                            $concat: [
+                                "$userDetails.firstName",
+                                " ",
+                                "$userDetails.lastName",
+                            ]
+                        },
+                        regex: queryRegex
+                    }
+                }
+
+                // basePipeline.push({
+                //     $match: {
+                //         $expr: {
+                //             $regexMatch: {
+                //                 input: {
+                //                     $concat: [
+                //                         "$userDetails.firstName",
+                //                         " ",
+                //                         "$userDetails.lastName",
+                //                     ]
+                //                 },
+                //                 regex: queryRegex
+                //             }
+                //         }
+                //     }
+                // });
+            }
+
+
+        }
+
+        basePipeline.push(
+            { $match: matchStage }
+        )
+
 
         if (Object.keys(dateFilter).length > 0) {
             basePipeline.push({
@@ -88,7 +156,7 @@ export const loader = async ({ params, request }) => {
         //     storeURL: session.shop,
         // });
 
-        // console.log('leaveRequestRecords from getLeavesData', leaveRequestRecords);
+        console.log('leaveRequestRecords from getLeavesData', leaveRequestRecords);
 
         return json({
             message: 'success',
@@ -100,8 +168,143 @@ export const loader = async ({ params, request }) => {
         })
 
     } catch (error) {
-        console.error("Error from attendance:", error);
+        console.error("Error from getApplied:", error);
         return json({ error: 'Failed server request.', message: error.message });
     }
 };
+
+// below code is working fine too if you didnt fing any issue in above code then remove below code.
+
+// import { json } from "@remix-run/node";
+// import { authenticate } from "../shopify.server";
+// import LeaveModal from "../MONGODB/LeaveModal.";
+
+// export const loader = async ({ params, request }) => {
+//     const query = JSON.parse(params.query);
+//     const limit = parseInt(params.limit);
+//     const page = parseInt(params.page);
+
+//     try {
+//         const { admin, session } = await authenticate.admin(request);
+
+//         let leaveRequestRecords;
+//         let totalItems;
+//         let totalPages;
+//         let hasNextPage;
+//         let hasPrevPage;
+
+//         const queryRegex = new RegExp(query.queryKeyword.replace(/\s+/g, '\\s*'), 'i');
+
+//         const matchStage = {
+//             storeURL: session.shop,
+//         };
+
+//         if (params.email !== 'false') {
+//             matchStage.createdBy = params.email;
+//             if (query.queryKeyword !== 'All') {
+//                 matchStage.reason = {
+//                     $regex: queryRegex
+//                 };
+//             }
+//         } else {
+//             matchStage.status = 'Pending';
+//         }
+
+//         const basePipeline = [
+//             { $match: matchStage }
+//         ];
+
+//         if (params.email === 'false') {
+//             basePipeline.push(
+//                 {
+//                     $lookup: {
+//                         from: "users",
+//                         localField: "createdBy",
+//                         foreignField: "email",
+//                         as: "userDetails"
+//                     }
+//                 },
+//                 { $unwind: "$userDetails" }
+//             );
+
+//             if (query.queryKeyword !== 'All') {
+//                 basePipeline.push({
+//                     $match: {
+//                         $expr: {
+//                             $regexMatch: {
+//                                 input: {
+//                                     $concat: [
+//                                         "$userDetails.firstName",
+//                                         " ",
+//                                         "$userDetails.lastName",
+//                                     ]
+//                                 },
+//                                 regex: queryRegex
+//                             }
+//                         }
+//                     }
+//                 });
+//             }
+//         }
+
+//         const dateFilter = {};
+//         if (query.startDate) {
+//             const startDate = new Date(query.startDate);
+//             startDate.setHours(0, 0, 0, 0);
+//             dateFilter.$gte = startDate;
+//         }
+//         if (query.endDate) {
+//             const endDate = new Date(query.endDate);
+//             endDate.setHours(23, 59, 59, 999);
+//             dateFilter.$lte = endDate;
+//         }
+
+//         if (Object.keys(dateFilter).length > 0) {
+//             basePipeline.push({
+//                 $match: { createdAt: dateFilter }
+//             });
+//         }
+
+//         basePipeline.push({
+//             $sort: { createdAt: -1 }
+//         });
+
+//         const countPipeline = [
+//             ...basePipeline,
+//             { $count: "totalItems" }
+//         ];
+
+//         const resultFromCount = await LeaveModal.aggregate(countPipeline);
+//         totalItems = resultFromCount.length > 0 ? resultFromCount[0].totalItems : 0;
+//         totalPages = Math.ceil(totalItems / limit);
+//         hasNextPage = page < totalPages;
+//         hasPrevPage = page > 1;
+
+//         if (!query.startDate && !query.endDate) {
+//             basePipeline.push(
+//                 { $skip: (page - 1) * limit },
+//                 { $limit: limit }
+//             );
+//         }
+
+//         const pipeline = [
+//             ...basePipeline,
+//         ];
+
+//         leaveRequestRecords = await LeaveModal.aggregate(pipeline);
+
+//         return json({
+//             message: 'success',
+//             data: leaveRequestRecords,
+//             hasNextPageS: hasNextPage,
+//             hasPrevPageS: hasPrevPage,
+//             totalItemsS: totalItems,
+//             limit
+//         });
+
+//     } catch (error) {
+//         console.error("Error from getApplied:", error);
+//         return json({ error: 'Failed server request.', message: error.message });
+//     }
+// };
 

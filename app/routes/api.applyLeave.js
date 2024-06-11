@@ -46,8 +46,8 @@ export const action = async ({ request }) => {
 
         // .......... calendar event code ............
         const event = {
-            'summary': 'Requested a leave.',
-            'description': `${data.employeeName} has applied for a leave request ${data.leaveEndDate ? `from ${data.leaveStartDate} to ${data.leaveEndDate}` : `on ${data.leaveStartDate}`}.`,
+            'summary': `${data.employeeName} requested leave ${data.leaveEndDate ? `from ${data.leaveStartDate} to ${data.leaveEndDate}` : `on ${data.leaveStartDate}`}.`,
+            'description': `Reason: ${data.leaveReason}`,
             'start': {
                 'date': data.leaveStartDate,
                 'timeZone': data.userTimezone,

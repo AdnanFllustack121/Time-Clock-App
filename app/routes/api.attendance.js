@@ -13,7 +13,7 @@ export const action = async ({ request }) => {
 
         let attendanceRecord;
         let message;
-        if (data.status === 'incomplete') {
+        if (data.status === 'Incomplete') {
 
             attendanceRecord = new AttendanceModel({
                 email: data.email,

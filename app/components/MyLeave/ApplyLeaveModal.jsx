@@ -15,7 +15,7 @@ export default function ApplyLeaveModal({ isTrue, toggleModal, handlePrimaryActi
     ];
 
     const handleChange = (_data, key) => {
-        // console.log('value', _data);
+        console.log('value', _data);
         setValue((prev) => ({
             ...prev,
             [key]: _data,
@@ -43,7 +43,7 @@ export default function ApplyLeaveModal({ isTrue, toggleModal, handlePrimaryActi
             onClose={() => {
                 type === 'applyLeave' ? toggleModal() : toggleModal(null, 'edit')
             }}
-            title={"Apply leave"}
+            title={type === 'applyLeave' ? "Apply leave" : "Update leave"}
             primaryAction={{
                 content: primaryContent,
                 onAction: handlePrimaryAction,

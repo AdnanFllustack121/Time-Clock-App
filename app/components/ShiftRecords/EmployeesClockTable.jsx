@@ -9,13 +9,16 @@ import {
     Divider,
     Tooltip, useSetIndexFiltersMode, IndexFilters, TextField
 } from '@shopify/polaris';
-import { ChatIcon } from '@shopify/polaris-icons';
+import { ChatIcon, ClockIcon } from '@shopify/polaris-icons';
 import moment from 'moment';
 import '../TimeClock/css/todaysClockTable.css'
 import { showToast } from '../Toast';
+import ModalComponent from '../ModalComponent';
+import { useSnapshot } from 'valtio';
+import { store } from '../../valtio/store';
 
 function formatTime(time) {
-    return moment(time).format('HH:mm:ss');
+    return moment(time).format('hh:mm:ss A');
 }
 
 function calculateDuration(inTime, outTime, forTotal, shiftRecords) {
@@ -39,15 +42,39 @@ function calculateDuration(inTime, outTime, forTotal, shiftRecords) {
 }
 
 export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setCurrentPage, setCurrentQueryPage, totalPages,
-    hasNextPage, hasPrevPage, calculateItemNumber, setQueryValue, queryValue, setDateFilter, dateFilter }) {
+    hasNextPage, hasPrevPage, calculateItemNumber, setQueryValue, queryValue, setDateFilter, dateFilter, setShiftRecords }) {
     const [totalDuration, setTotalDuration] = useState("--");
     const { mode, setMode } = useSetIndexFiltersMode();
     const [itemStrings, setItemStrings] = useState([
         'Generate Report',
     ]);
+    const [isLoadingButton, setLoadingButton] = useState(false)
+    const [openNoteModal, setOpenNoteModal] = useState({
+        isOpen: false,
+        type: 'adminClockOut',
+        idToClockout: ''
+    })
+    const [clockOutFields, setClockOutFields] = useState({
+        out_time: '',
+        note: ''
+    })
+    const snap = useSnapshot(store)
 
     const handleSelectingStartDate = (_v) => {
         setDateFilter((prev) => ({ ...prev, startDate: _v }))
+    }
+
+    const toggleClockoutModal = (id) => {
+        openNoteModal.isOpen && setClockOutFields({
+            out_time: '',
+            note: ''
+        })
+        setOpenNoteModal((prev) => ({
+            isOpen: !prev.isOpen,
+            type: 'adminClockOut',
+            idToClockout: !prev.isOpen ? id : ''
+        }))
+
     }
 
     const handleSelectingEndDate = (_v) => {
@@ -58,7 +85,7 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
     const filters = [
         {
             key: 'startDate',
-            label: 'Start date',
+            label: 'In date from',
             filter: (
                 <TextField
                     value={dateFilter.startDate}
@@ -71,7 +98,7 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
         },
         {
             key: 'endDate',
-            label: 'End date',
+            label: 'In date to',
             filter: (
                 <TextField
                     value={dateFilter.endDate}
@@ -148,7 +175,62 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
         }
     }, [shiftRecords, isLoadingTable]);
 
-    const rowMarkup = shiftRecords.length <= 0 ? [] : shiftRecords?.map(({ _id, in_time, out_time, note, userDetails }, i) => (
+    const handleClockOut = useCallback(async () => {
+        // console.log('clockOutFields', clockOutFields);
+        // console.log('openNoteModal.idToClockout', openNoteModal.idToClockout);
+        const clockedOutTime = shiftRecords.filter(_d => _d._id === openNoteModal.idToClockout)[0]?.in_time
+        // console.log('clockedOutTime', clockedOutTime);
+
+        // console.log('new Date(clockOutFields.out_time)  new Date(clockedOutTime)', new Date(clockOutFields.out_time), '<', new Date(clockedOutTime));
+
+        if (clockOutFields.out_time.length < 1) return showToast("Please fill in the 'date and time' field. It is required to clock out.")
+        if (new Date(clockOutFields.out_time) < new Date(clockedOutTime)) return showToast("Clock-out time cannot be earlier than the clock-in time.")
+
+        setLoadingButton(true)
+        const apiData = {
+            out_time: new Date(clockOutFields.out_time),
+            email: snap.user.email,
+            status: "Complete",
+            note: clockOutFields.note,
+            idToUpdate: openNoteModal.idToClockout
+        }
+        // console.log('out-time apiData', apiData);
+
+        try {
+            const response = await fetch('/api/attendance', {
+                method: 'post',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(apiData)
+            })
+
+            if (response.ok) {
+                const { message, attendanceData } = await response.json()
+                showToast(message)
+
+                setShiftRecords(prevAttendance =>
+                    prevAttendance.map(d =>
+                        d._id === openNoteModal.idToClockout ? { ...d, note: clockOutFields.note, out_time: clockOutFields.out_time, status: 'Complete' } : d
+                    )
+                );
+
+            }
+
+        } catch (error) {
+            console.log('error on clockIn', error);
+        } finally {
+            setLoadingButton(false)
+            toggleClockoutModal()
+        }
+    }, [clockOutFields, shiftRecords])
+
+    const handleAdminInputChange = (data, type) => {
+        console.log('handleAdminInputChange data', data, '  ', type);
+        setClockOutFields(_prev => ({ ..._prev, [type]: data }))
+    }
+
+    const rowMarkup = shiftRecords.length <= 0 ? [] : shiftRecords?.map(({ _id, in_time, out_time, note, userDetails, status }, i) => (
         <IndexTable.Row key={_id}>
             <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{calculateItemNumber(i)}</Text></IndexTable.Cell>
             <IndexTable.Cell>{`${userDetails?.firstName} ${userDetails?.lastName}`}</IndexTable.Cell>
@@ -164,6 +246,29 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
                 </Tooltip>
             </IndexTable.Cell>
             <IndexTable.Cell>{calculateDuration(in_time, out_time)}</IndexTable.Cell>
+            <IndexTable.Cell>
+                {status === 'Incomplete' ?
+                    <Text tone='critical'>
+                        {status}
+                    </Text>
+                    :
+                    <Text tone='success'>
+                        {status}
+                    </Text>
+                }
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+                {status === 'Incomplete' ?
+                    <Button
+                        onClick={() => toggleClockoutModal(_id)}
+                        // size="large"
+                        icon={<Icon source={ClockIcon} />}
+                        tone='critical'
+                    >
+                        Clock Out
+                    </Button> : '--'}
+            </IndexTable.Cell>
+
         </IndexTable.Row>
     ));
 
@@ -210,6 +315,8 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
                             { title: 'Out Time' },
                             { title: 'Note' },
                             { title: 'Duration' },
+                            { title: 'Status' },
+                            { title: 'Action' },
                         ]}
                         selectable={false}
                         pagination={{
@@ -242,14 +349,18 @@ export default function EmployeesClockTable({ shiftRecords, isLoadingTable, setC
                 <div className='total_hours'>
                     <Text variant="headingMd" as="h6">{`Total Hours: ${totalDuration}`}</Text>
                 </div></>}
+
+            <ModalComponent
+                isTrue={openNoteModal.isOpen}
+                toggleModal={toggleClockoutModal}
+                handlePrimaryAction={handleClockOut}
+                type={openNoteModal.type}
+                primaryContent={"Save"}
+                secondaryContent={"Cancel"}
+                value={clockOutFields}
+                handleAdminInputChange={handleAdminInputChange}
+                isLoadingButton={isLoadingButton}
+            />
         </div>
     );
-
-    function isEmpty(value) {
-        if (Array.isArray(value)) {
-            return value.length === 0;
-        } else {
-            return value === '' || value == null;
-        }
-    }
 }

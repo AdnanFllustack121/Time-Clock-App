@@ -159,10 +159,14 @@ export const loader = async ({ params, request }) => {
 
             const dateFilter = {};
             if (query.startDate) {
-                dateFilter.$gte = new Date(query.startDate);
+                const startDate = new Date(query.startDate);
+                startDate.setHours(0, 0, 0, 0);
+                dateFilter.$gte = startDate;
             }
             if (query.endDate) {
-                dateFilter.$lte = new Date(query.endDate);
+                const endDate = new Date(query.endDate);
+                endDate.setHours(23, 59, 59, 999);
+                dateFilter.$lte = endDate;
             }
 
             const basePipeline = [

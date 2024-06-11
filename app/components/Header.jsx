@@ -3,6 +3,7 @@ import React, { useCallback } from 'react';
 import { useSnapshot } from 'valtio';
 import { store } from '../valtio/store';
 import { useNavigate } from '@remix-run/react';
+import { showToast } from './Toast';
 
 export default function Header({ title, component }) {
     const snap = useSnapshot(store)
@@ -18,6 +19,7 @@ export default function Header({ title, component }) {
             isUserDocEmpty: false,
             isLoggedIn: false
         }
+        showToast('You have successfully logged out')
         navigate('/app/Login')
     }, [])
 
