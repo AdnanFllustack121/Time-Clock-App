@@ -77,7 +77,7 @@ export default function MyLeaveComponent() {
       // console.log('queryParams', queryParams);
 
       const response = await fetch(`/api/getAppliedLeave/${snap.user.email}/${queryParams}/
-          ${page}/${itemsPerPage}`, {
+          ${page}/${itemsPerPage}/${false}`, {
         method: 'get',
         headers: {
           "Content-Type": "application/json",
@@ -123,6 +123,8 @@ export default function MyLeaveComponent() {
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const apiData = {
       ...formValues,
+      leaveStartDate: new Date(formValues.leaveStartDate),
+      leaveEndDate: formValues.leaveEndDate ? new Date(formValues.leaveEndDate) : formValues.leaveEndDate,
       createdAt: new Date(),
       createdBy: snap.user.email,
       employeeName: `${snap.user.firstName} ${snap.user.lastName}`,
@@ -226,7 +228,10 @@ export default function MyLeaveComponent() {
         // setMyLeaveRecords(prev => {
         //   return prev.filter(_d => _d._id !== data._id)
         // })
+
+
         fetchMyLeaveRecords()
+
       }
     } catch (error) {
       console.log('error while deleting leave!', error);
@@ -287,7 +292,7 @@ export default function MyLeaveComponent() {
 
       <div className='clockTableHeading' style={{ marginBottom: '0rem' }}>
         <Text variant="headingXl" as="h4">
-          <span className='headingTextColor'>Applied Leaves records</span>
+          <span className='headingTextColor'>Applied leaves records</span>
         </Text>
       </div>
       <div className="apply_button">

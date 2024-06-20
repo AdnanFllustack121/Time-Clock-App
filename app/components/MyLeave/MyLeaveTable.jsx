@@ -214,8 +214,11 @@ export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurren
                         ]}
                         selectable={false}
                         pagination={{
-                            hasNext: (dateFilter.startDate || dateFilter.endDate) ? false : hasNextPage,
-                            hasPrevious: (dateFilter.startDate || dateFilter.endDate) ? false : hasPrevPage,
+                            // below code is for if we dont want pagination on a datefilter
+                            // hasNext: (dateFilter.startDate || dateFilter.endDate) ? false : hasNextPage,
+                            // hasPrevious: (dateFilter.startDate || dateFilter.endDate) ? false : hasPrevPage,
+                            hasNext: hasNextPage,
+                            hasPrevious: hasPrevPage,
                             onNext: () => {
                                 if (queryValue.length > 0) {
                                     setCurrentQueryPage(prevPage => Math.min(prevPage + 1, totalPages))

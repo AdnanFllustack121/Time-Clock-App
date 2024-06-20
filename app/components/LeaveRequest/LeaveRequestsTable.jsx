@@ -13,7 +13,7 @@ import moment from 'moment'
 
 
 export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable, setCurrentPage, setCurrentQueryPage, totalPages,
-    hasNextPage, hasPrevPage, setQueryValue, queryValue, setDateFilter, dateFilter, calculateItemNumber, toggleActionModal }) {
+    hasNextPage, hasPrevPage, setQueryValue, queryValue, setDateFilter, dateFilter, calculateItemNumber, leaveAdminAction, handleRejectToggle, isLoadingActionBTN }) {
 
     const { mode, setMode } = useSetIndexFiltersMode();
 
@@ -144,33 +144,33 @@ export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable
                         </p>
                     </IndexTable.Cell>
                     <IndexTable.Cell>
-                        {status === 'Pending' && (
-                            <div className='approveRejectBtn'>
-                                <Button
-                                    variant="primary"
-                                    tone="success"
-                                    icon={<Icon source={CheckIcon} />}
-                                    onClick={() => {
-                                        toggleActionModal(_id, 'approve');
-                                    }}
-                                >
-                                    Approve
-                                </Button>
-                                <div style={{ marginBottom: '5px' }}></div>
-                                <Button
-                                    variant="primary"
-                                    tone="critical"
-                                    icon={<Icon source={XIcon} />}
-                                    onClick={() => {
-                                        toggleActionModal(_id, 'reject');
-                                    }}
-                                    style={{ alignSelf: 'flex-end' }}
-                                >
-                                    Reject
-                                </Button>
+                        {status === 'Pending' ? (<div className='approveRejectBtn'>
+                            <Button
+                                variant="primary"
+                                tone="success"
+                                loading={isLoadingActionBTN[_id] === 'approve'}
+                                icon={<Icon source={CheckIcon} />}
+                                onClick={() => {
+                                    leaveAdminAction(_id, 'approve');
+                                }}
+                            >
+                                Approve
+                            </Button>
+                            <div style={{ marginBottom: '5px' }}></div>
+                            <Button
+                                variant="primary"
+                                tone="critical"
+                                icon={<Icon source={XIcon} />}
+                                loading={isLoadingActionBTN[_id] === 'reject'}
+                                onClick={() => {
+                                    handleRejectToggle(_id, 'reject');
+                                }}
+                                style={{ alignSelf: 'flex-end' }}
+                            >
+                                Reject
+                            </Button>
 
-                            </div>
-                        )}
+                        </div>) : '--'}
                     </IndexTable.Cell>
 
 
@@ -225,8 +225,11 @@ export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable
                         ]}
                         selectable={false}
                         pagination={{
-                            hasNext: (dateFilter.startDate || dateFilter.endDate) ? false : hasNextPage,
-                            hasPrevious: (dateFilter.startDate || dateFilter.endDate) ? false : hasPrevPage,
+                            // below code is for if we dont want pagination on a datefilter
+                            // hasNext: (dateFilter.startDate || dateFilter.endDate) ? false : hasNextPage,
+                            // hasPrevious: (dateFilter.startDate || dateFilter.endDate) ? false : hasPrevPage,
+                            hasNext: hasNextPage,
+                            hasPrevious: hasPrevPage,
                             onNext: () => {
                                 if (queryValue.length > 0) {
                                     setCurrentQueryPage(prevPage => Math.min(prevPage + 1, totalPages))

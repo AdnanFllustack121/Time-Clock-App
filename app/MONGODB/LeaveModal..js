@@ -5,8 +5,8 @@ const LeaveModelSchema = mongoose.Schema({
     reason: String,
     storeURL: String,
     duration: String,
-    startDate: String,
-    endDate: String,
+    startDate: Date,
+    endDate: Date,
     createdAt: Date,
     createdBy: String,
     status: String
