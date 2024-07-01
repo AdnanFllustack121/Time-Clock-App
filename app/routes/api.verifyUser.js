@@ -25,6 +25,7 @@ export const action = async ({ request }) => {
         const { admin, session } = await authenticate.admin(request);
 
         const count = await userModel.countDocuments({});
+        // console.log('count=============>==============>', count);
         if (count > 0) {
             isUserDocEmpty = false
         } else {

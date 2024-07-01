@@ -4,9 +4,10 @@ import { store } from "../../valtio/store";
 export async function verifyUser() {
     const timeClockToken = localStorage.getItem("time_clock_token");
     console.log('timeClockToken', timeClockToken);
-    if (!timeClockToken) {
-        return false;
-    }
+    // if (!timeClockToken) {
+    //     return false;
+    // }
+    // console.log('timeClockToken below return');
 
     try {
         const response = await fetch(
@@ -30,6 +31,8 @@ export async function verifyUser() {
             lastName: user ? user.lastName : '',
             email: user ? user.email : '',
             isAdmin: user ? user.isAdmin : false,
+            contact: user ? user.contact : false,
+            isSuperAdmin: user ? user.isSuperAdmin : false,
             isLoggedIn: status ? true : false,
             isUserDocEmpty
         }

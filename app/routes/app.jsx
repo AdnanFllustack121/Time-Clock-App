@@ -36,15 +36,20 @@ export default function App() {
         >
           My Leave
         </Link>}
-        {snap.user.isAdmin && snap.user.isLoggedIn && <Link
+        {(snap.user.isAdmin || snap.user.isSuperAdmin) && snap.user.isLoggedIn && <Link
           to="/app/shiftRecords"
         >
           Shift Records
         </Link>}
-        {snap.user.isAdmin && snap.user.isLoggedIn && <Link
+        {(snap.user.isAdmin || snap.user.isSuperAdmin) && snap.user.isLoggedIn && <Link
           to="/app/leaveRequests"
         >
           Leave Requests
+        </Link>}
+        {snap.user.isSuperAdmin && snap.user.isLoggedIn && <Link
+          to="/app/ManageAdmins"
+        >
+          Manage Admins
         </Link>}
       </NavMenu>
       <Outlet />

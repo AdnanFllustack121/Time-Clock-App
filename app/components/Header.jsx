@@ -15,6 +15,8 @@ export default function Header({ title, component }) {
             firstName: '',
             lastName: '',
             email: '',
+            contact: '',
+            isSuperAdmin: false,
             isAdmin: false,
             isUserDocEmpty: false,
             isLoggedIn: false

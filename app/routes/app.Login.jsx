@@ -15,47 +15,58 @@ import { showToast } from "../components/Toast";
 import { useNavigate } from "@remix-run/react";
 
 export default function Signup() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false)
-    const navigate = useNavigate()
-    const [isLoading, setLoading] = useState(false)
+    const [formValues, setFormValues] = useState({
+        email: "",
+        password: "",
+        showPassword: false
+    });
+    const { email, password, showPassword } = formValues;
+    const navigate = useNavigate();
+    const [isLoading, setLoading] = useState(false);
 
+    const handleInputChange = useCallback((field, value) => {
+        setFormValues(prevState => ({
+            ...prevState,
+            [field]: value
+        }));
+    }, []);
+
+    const handleShowPasswordChange = useCallback(() => {
+        setFormValues(prevState => ({
+            ...prevState,
+            showPassword: !prevState.showPassword
+        }));
+    }, []);
 
     const handleSubmit = useCallback(async () => {
         try {
-            setLoading(true)
+            setLoading(true);
             console.log('submit event login', {
-                password,
-                email
+                email,
+                password
             });
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
             const passwordRegex = /^.{8,}$/;
             const notEmptyRegex = /^.{1,}$/;
 
-            if (!notEmptyRegex.test(email) ||
-                !notEmptyRegex.test(password)) {
+            if (!notEmptyRegex.test(email) || !notEmptyRegex.test(password)) {
                 showToast("Fields shouldn't be empty", true);
                 return;
             }
-
 
             if (!emailRegex.test(email)) {
                 showToast("Invalid email format", true);
                 return;
             }
 
-
             if (!passwordRegex.test(password)) {
                 showToast("Password must be at least 8 characters long", true);
                 return;
             }
-            const newData = {
-                email,
-                password
-            }
+
+            const newData = { email, password };
+
             const response = await fetch(
                 `/api/login`,
                 {
@@ -83,23 +94,17 @@ export default function Signup() {
                 }
             }
         } catch (error) {
-            console.error('error on login', error)
+            console.error('error on login', error);
             showToast(`An unexpected error occurred. Please try again later. error: ${error}`, true);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }, [password, email]);
-
-    const handleEmailChange = useCallback((value) => setEmail(value), []);
-    const handlePasswordChange = useCallback((value) => setPassword(value), []);
-    const handleShowPasswordChange = useCallback(() => { setShowPassword(v => !v), [] });
-
+    }, [email, password, navigate]);
 
     return (
         <Page narrowWidth>
             <div style={{ marginTop: "4rem" }}></div>
             <Card sectioned title="Login">
-
                 <Placeholder
                     component={
                         <>
@@ -107,14 +112,13 @@ export default function Signup() {
                                 Sign in
                             </Text>
                             <div style={{ marginTop: "1rem" }}></div>
-
-                            <Form>
+                            <Form onSubmit={handleSubmit}>
                                 <FormLayout>
                                     <Placeholder
                                         component={
                                             <TextField
                                                 value={email}
-                                                onChange={handleEmailChange}
+                                                onChange={(value) => handleInputChange('email', value)}
                                                 type="email"
                                                 autoComplete="email"
                                                 label="Email Address"
@@ -129,15 +133,12 @@ export default function Signup() {
                                         itemsCentered={false}
                                     />
 
-
                                     <Placeholder
                                         component={
                                             <TextField
                                                 value={password}
-                                                onChange={handlePasswordChange}
-                                                type={
-                                                    showPassword ? "text" : "password"
-                                                }
+                                                onChange={(value) => handleInputChange('password', value)}
+                                                type={showPassword ? "text" : "password"}
                                                 autoComplete="password"
                                                 label="Password"
                                                 placeholder="Please enter a password"
@@ -156,27 +157,25 @@ export default function Signup() {
                                         onChange={handleShowPasswordChange}
                                     />
 
+                                    {/* <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                                        <Button size="large" loading={isLoading} primary submit>
+                                            Submit
+                                        </Button>
+                                    </div>
+                                    <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                                        <Link url="/app/Signup">Create an account</Link>
+                                    </div> */}
 
-
-                                    <Placeholder
-                                        component={
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <Button size="large" loading={isLoading} primary onClick={handleSubmit} >
-                                                    Submit
-                                                </Button>
-                                                <Link url="/app/Signup">Create an account</Link>
-
-                                            </div>
-
-                                        }
-                                        marginTop='12px'
-                                        padding='auto'
-                                        height='auto'
-                                        width='auto'
-                                        marginBottom='0px'
-                                        itemsCentered={false}
-                                    />
-
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
+                                        <div style={{ marginBottom: '10px' }}>
+                                            <Button loading={isLoading} size="large" variant="primary" primary submit>
+                                                Submit
+                                            </Button>
+                                        </div>
+                                        <div>
+                                            <Link url="/app/Signup" style={{ fontSize: '14px', textDecoration: 'underline' }}>Sign up for an account</Link>
+                                        </div>
+                                    </div>
                                 </FormLayout>
                             </Form>
                         </>
@@ -188,8 +187,6 @@ export default function Signup() {
                     marginBottom='0'
                     itemsCentered={false}
                 />
-
-
             </Card>
         </Page>
     );

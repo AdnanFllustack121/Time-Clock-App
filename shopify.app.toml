@@ -3,7 +3,7 @@
 client_id = "dfd369953b428513d8d8791521263944"
 name = "Time Clock"
 handle = "time-clock-1"
-application_url = "https://swimming-develops-dragon-rep.trycloudflare.com"
+application_url = "https://monitors-reform-aluminium-mazda.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = ""
 
 [auth]
 redirect_urls = [
-  "https://swimming-develops-dragon-rep.trycloudflare.com/auth/callback",
-  "https://swimming-develops-dragon-rep.trycloudflare.com/auth/shopify/callback",
-  "https://swimming-develops-dragon-rep.trycloudflare.com/api/auth/callback"
+  "https://monitors-reform-aluminium-mazda.trycloudflare.com/auth/callback",
+  "https://monitors-reform-aluminium-mazda.trycloudflare.com/auth/shopify/callback",
+  "https://monitors-reform-aluminium-mazda.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

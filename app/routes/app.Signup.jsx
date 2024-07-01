@@ -7,105 +7,66 @@ import {
     TextField,
     Card,
     Page,
-    Checkbox,Link,
+    Checkbox,
+    Link,
 } from "@shopify/polaris";
 import Placeholder from "../components/placeholder";
 import { showToast } from "../components/Toast";
 import { useNavigate } from "@remix-run/react";
 import { useSnapshot } from "valtio";
 import { store } from "../valtio/store";
-
+import { verifyUser } from "../components/authentications/verifyUser";
+import Loader from "../components/Loader";
 
 export default function Signup() {
-    const [name, setName] = useState({
-        fistName: "",
-        lastName: ""
-    })
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false)
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        contact: "",
+    });
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setLoading] = useState(false);
+    const [isVerified, setVerified] = useState(false);
+
     const navigate = useNavigate();
-    const snap = useSnapshot(store)
-    const [isLoading, setLoading] = useState(false)
+    const snap = useSnapshot(store);
 
-    // const handleSubmit = useCallback(async () => {
-    //     console.log('submit event', {
-    //         email,
-    //         password,
-    //         confirmPassword
-    //     });
-    //     if (password !== confirmPassword) {
-    //         showToast("Password doesn't matche!")
-    //     }
+    useEffect(() => {
+        async function doVerification() {
+            try {
+                const isVerified = await verifyUser();
+                console.log("isVerified:", isVerified);
+                setVerified(true);
+            } catch (error) {
+                console.error('Error verifying user:', error);
+            }
+        }
 
-    //     const newData = {
-    //         email,
-    //         password,
-    //         firstName: name.fistName,
-    //         lastName: name.lastName
-    //     }
-
-    //     try {
-    //         const response = await fetch(
-    //             `/api/signup`,
-    //             {
-    //                 method: "POST",
-    //                 headers: {
-    //                     "Content-Type": "application/json",
-    //                 },
-    //                 body: JSON.stringify(newData),
-    //             }
-    //         );
-
-    //         if (response.ok) {
-    //             const { message, status } = await response.json();
-    //             if (status) {
-    //                 console.log('message', message)
-    //                 // document.cookie = `TimeClockAppToken=${token};path='https://admin.shopify.com/store/oneponte/apps/time-clock-1/app'`;
-    //                 setTimeout(() => {
-    //                     navigate("/app");
-    //                 }, 1000);
-    //             }
-
-    //             showToast(message)
-    //         };
-    //     } catch (error) {
-    //         console.error('error on Signup', error)
-    //     } finally {
-    //         // setEmail("");
-    //         // setPassword("");
-    //         // setConfirmPassword("")
-    //         // setName({
-    //         //     fistName: "",
-    //         //     lastName: ""
-    //         // })
-    //     }
-
-
-    // }, [email, password, confirmPassword]);
-
+        doVerification();
+    }, [navigate]);
 
     const handleSubmit = useCallback(async () => {
         try {
+            setLoading(true);
 
-            setLoading(true)
-            console.log('submit event', {
-                email,
-                password,
-                confirmPassword
-            });
+            const { firstName, lastName, email, password, confirmPassword, contact } = formData;
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             const passwordRegex = /^.{8,}$/;
             const notEmptyRegex = /^.{1,}$/;
 
-            if (!notEmptyRegex.test(name.fistName) ||
-                !notEmptyRegex.test(name.lastName) ||
+            if (
+                !notEmptyRegex.test(firstName) ||
+                !notEmptyRegex.test(lastName) ||
                 !notEmptyRegex.test(email) ||
                 !notEmptyRegex.test(password) ||
-                !notEmptyRegex.test(confirmPassword)) {
+                !notEmptyRegex.test(confirmPassword) ||
+                !notEmptyRegex.test(contact)
+            ) {
                 showToast("Fields shouldn't be empty", true);
                 return;
             }
@@ -124,24 +85,24 @@ export default function Signup() {
                 showToast("Password doesn't match!", true);
                 return;
             }
-            console.log(' snap.user.isUserDocEmpty', snap.user.isUserDocEmpty);
+
             const newData = {
+                firstName,
+                lastName,
                 email,
                 password,
-                firstName: name.fistName,
-                lastName: name.lastName,
-                isAdmin: snap.user.isUserDocEmpty ? true : false
+                contact,
+                isSuperAdmin: snap.user.isUserDocEmpty ? true : false,
+                isAdmin: false,
             };
-            const response = await fetch(
-                `/api/signup`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(newData),
-                }
-            );
+
+            const response = await fetch(`/api/signup`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newData),
+            });
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -157,6 +118,8 @@ export default function Signup() {
                         firstName: user ? user.firstName : '',
                         lastName: user ? user.lastName : '',
                         email: user ? user.email : '',
+                        contact: user ? user.contact : '',
+                        isSuperAdmin: user ? user.isSuperAdmin : false,
                         isAdmin: user ? user.isAdmin : false,
                         isLoggedIn: true
                     }
@@ -171,198 +134,129 @@ export default function Signup() {
             console.error('error on Signup', error)
             showToast("An unexpected error occurred. Please try again later.");
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }, [email, password, confirmPassword, name, navigate, showToast]);
+    }, [formData, navigate, snap.user.isUserDocEmpty]);
 
+    const handleChange = useCallback((field, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value,
+        }));
+    }, []);
 
-
-    const handleEmailChange = useCallback((value) => setEmail(value), []);
-    const handlePasswordChange = useCallback((value) => setPassword(value), []);
-    const handleConfirmPasswordChange = useCallback((value) => setConfirmPassword(value), []);
     const handleShowPasswordChange = useCallback(() => {
-        console.log('hit sdfsdf')
-        setShowPassword(v => !v), []
-    });
-    const handleConfirmShowPasswordChange = useCallback(() => setShowConfirmPassword(v => !v), []);
+        setShowPassword(prev => !prev);
+    }, []);
 
 
     return (
-        <Page narrowWidth>
-            <div style={{ marginTop: "4rem" }}></div>
-            <Card sectioned title="Login">
+        <>
+            {!isVerified ? <Loader /> : <Page narrowWidth>
+                <div style={{ marginTop: "4rem" }}></div>
+                <Card sectioned title="Sign Up">
+                    <Placeholder
+                        component={
+                            <>
+                                <Text variant="headingXl" alignment="center" as="h4">
+                                    Sign Up
+                                </Text>
+                                <div style={{ marginTop: "5px" }}></div>
+                                {snap.user.isUserDocEmpty ? (
+                                    <Text variant="headingXs" alignment="center" as="h6">
+                                        Your account is being created as a super admin.
+                                    </Text>
+                                ) : null}
+                                <div style={{ marginTop: "2rem" }}></div>
 
-                <Placeholder
-                    component={
-                        <>
-                            <Text variant="headingXl" alignment="center" as="h4">
-                                Sign Up
-                            </Text>
-                            <div style={{ marginTop: "5px" }}></div>
-                            <Text variant="headingXs" alignment="center" as="h6">
-                                Your account is getting created as an {snap.user.isUserDocEmpty ? "admin" : "employee"}.
-                            </Text>
-                            <div style={{ marginTop: "1rem" }}></div>
-
-                            <Form>
-                                <FormLayout>
-                                    <Placeholder
-                                        component={
-                                            <FormLayout.Group>
-                                                <TextField
-                                                    value={name.fistName}
-                                                    onChange={(_v) => setName((prev) => ({ ...prev, fistName: _v }))}
-                                                    type="text"
-                                                    autoComplete="firstName"
-                                                    label="First Name"
-                                                    placeholder="Please enter your first name"
-                                                />
-                                                <TextField
-                                                    value={name.lastName}
-                                                    onChange={(_v) => setName((prev) => ({ ...prev, lastName: _v }))}
-                                                    type="text"
-                                                    autoComplete="lastName"
-                                                    label="Last Name"
-                                                    placeholder="Please enter your last name"
-                                                />
-                                            </FormLayout.Group>
-
-                                        }
-                                        marginTop='15px'
-                                        padding='0'
-                                        height='auto'
-                                        width='auto'
-                                        marginBottom='7px'
-                                        itemsCentered={false}
-                                    />
-
-                                    <Placeholder
-                                        component={
+                                <Form onSubmit={handleSubmit}>
+                                    <FormLayout>
+                                        <FormLayout.Group>
                                             <TextField
-                                                value={email}
-                                                onChange={handleEmailChange}
+                                                value={formData.firstName}
+                                                onChange={(value) => handleChange('firstName', value)}
+                                                type="text"
+                                                autoComplete="firstName"
+                                                label="First Name"
+                                                placeholder="Please enter your first name"
+                                            />
+                                            <TextField
+                                                value={formData.lastName}
+                                                onChange={(value) => handleChange('lastName', value)}
+                                                type="text"
+                                                autoComplete="lastName"
+                                                label="Last Name"
+                                                placeholder="Please enter your last name"
+                                            />
+                                        </FormLayout.Group>
+
+                                        <FormLayout.Group>
+                                            <TextField
+                                                value={formData.email}
+                                                onChange={(value) => handleChange('email', value)}
                                                 type="email"
                                                 autoComplete="email"
                                                 label="Email Address"
                                                 placeholder="Please enter an email address"
                                             />
-
-                                        }
-                                        marginTop='0px'
-                                        padding='0'
-                                        height='auto'
-                                        width='auto'
-                                        marginBottom='7px'
-                                        itemsCentered={false}
-                                    />
-
-
-                                    <Placeholder
-                                        component={
                                             <TextField
-                                                value={password}
-                                                onChange={handlePasswordChange}
-                                                type={
-                                                    showPassword ? "text" : "password"
-                                                }
-                                                autoComplete="password"
-                                                label="Password"
-                                                placeholder="Please enter a password"
+                                                value={formData.contact}
+                                                onChange={(value) => handleChange('contact', value)}
+                                                type='number'
+                                                autoComplete="contact"
+                                                label="Contact Number"
+                                                placeholder="Please enter your contact number"
                                             />
-                                        }
-                                        marginTop='0'
-                                        padding='0'
-                                        height='auto'
-                                        width='auto'
-                                        marginBottom='-10px'
-                                        itemsCentered={false}
-                                    />
-                                    <Checkbox
-                                        label="Show password"
-                                        checked={showPassword}
-                                        onChange={handleShowPasswordChange}
-                                    />
+                                        </FormLayout.Group>
 
+                                        <TextField
+                                            value={formData.password}
+                                            onChange={(value) => handleChange('password', value)}
+                                            type={showPassword ? "text" : "password"}
+                                            autoComplete="new-password"
+                                            label="Password"
+                                            placeholder="Please enter a password"
+                                        />
 
-                                    <Placeholder
-                                        component={
-                                            <TextField
-                                                value={confirmPassword}
-                                                onChange={handleConfirmPasswordChange}
-                                                type={
-                                                    showConfirmPassword ? "text" : "password"
-                                                }
-                                                autoComplete="password"
-                                                label="Confirm Password"
-                                                placeholder="Please enter a password again"
-                                            />
-                                        }
-                                        marginTop='7px'
-                                        padding='0'
-                                        height='auto'
-                                        width='auto'
-                                        marginBottom='-10px'
-                                        itemsCentered={false}
-                                    />
+                                        <TextField
+                                            value={formData.confirmPassword}
+                                            onChange={(value) => handleChange('confirmPassword', value)}
+                                            type={showPassword ? "text" : "password"}
+                                            autoComplete="new-password"
+                                            label="Confirm Password"
+                                            placeholder="Please enter a password again"
+                                        />
+                                        <Checkbox
+                                            label="Show password"
+                                            checked={showPassword}
+                                            onChange={handleShowPasswordChange}
+                                        />
 
-                                    <Checkbox
-                                        label="Show password"
-                                        checked={showConfirmPassword}
-                                        onChange={handleConfirmShowPasswordChange}
-                                    />
-
-
-                                    {/* <Placeholder
-                                        component={
-                                            <div style={{ width: '25%' }}>
-                                                <Button fullWidth loading={isLoading} size="large" primary onClick={handleSubmit} >
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
+                                            <div style={{ marginBottom: '10px' }}>
+                                                <Button loading={isLoading} size="large" variant="primary" primary submit>
                                                     Submit
                                                 </Button>
-
                                             </div>
-
-                                        }
-                                        marginTop='10px'
-                                        padding='auto'
-                                        height='auto'
-                                        width='auto'
-                                        marginBottom='0px'
-                                        itemsCentered={true}
-                                    /> */}
-
-                                    <Placeholder
-                                        component={
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <Button loading={isLoading} size="large" primary onClick={handleSubmit} >
-                                                    Submit
-                                                </Button>
-                                                <Link url="/app/Login">Already have an account.</Link>
-
+                                            <div>
+                                                <Link url="/app/Login" style={{ fontSize: '14px', textDecoration: 'underline' }}>Sign in to your account</Link>
                                             </div>
-
-                                        }
-                                        marginTop='12px'
-                                        padding='auto'
-                                        height='auto'
-                                        width='auto'
-                                        marginBottom='0px'
-                                        itemsCentered={false}
-                                    />
-
-                                </FormLayout>
-                            </Form>
-                        </>
-                    }
-                    marginTop='0'
-                    padding='50px'
-                    height='auto'
-                    width='auto'
-                    marginBottom='0'
-                    itemsCentered={false}
-                />
+                                        </div>
 
 
-            </Card>
-        </Page>
+                                    </FormLayout>
+                                </Form>
+                            </>
+                        }
+                        marginTop='0'
+                        padding='50px'
+                        height='auto'
+                        width='auto'
+                        marginBottom='0'
+                        itemsCentered={false}
+                    />
+                </Card>
+            </Page>}
+        </>
     );
 }

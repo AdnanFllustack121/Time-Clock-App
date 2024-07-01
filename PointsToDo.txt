@@ -1,0 +1,15 @@
+Points to be done :- 
+
+1. Login with google for employee                                                   ==                                                              ==> will do later
+
+2. there will be 3 roles :
+a) Super admin (can make anyone an admin)
+b) admin
+c) employee
+
+3. Database:-  Mysql                                                                 ==                                                             ==> will do later
+
+4. More information on employee profile 
+    emergency contact and other details client will tell about the information later he want for the employee
+
+5. Need to make a employee shift records in time and out time editable for admin

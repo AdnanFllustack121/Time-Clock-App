@@ -8,13 +8,8 @@ import { createSecretToken } from "../components/authentications/createSecretTok
 
 export const action = async ({ request }) => {
     const data = JSON.parse(await request.text())
-    const { email, password, firstName, lastName, isAdmin } = data
-    console.log('data get from signup', {
-        email,
-        password,
-        firstName,
-        lastName
-    })
+    const { email, password, firstName, lastName, isAdmin, isSuperAdmin, contact } = data
+    // console.log('data get from signup', data)
 
 
     try {
@@ -26,7 +21,7 @@ export const action = async ({ request }) => {
         // console.log('cookieGot', cookieGot)
 
 
-        console.log('session.shop of api signup.............', session.shop);
+        // console.log('session.shop of api signup.............', session.shop);
 
         const userFound = await userModel.findOne({ email }).exec();
 
@@ -41,7 +36,16 @@ export const action = async ({ request }) => {
 
         console.log('hashedPassword', hashedPassword);
 
-        const newUser = new userModel({ email, password: hashedPassword, firstName, lastName, isAdmin, storeURL: session.shop });
+        const newUser = new userModel({
+            firstName,
+            lastName,
+            email,
+            contact,
+            password: hashedPassword,
+            isAdmin,
+            isSuperAdmin,
+            storeURL: session.shop,
+        });
         await newUser.save();
 
 

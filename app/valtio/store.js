@@ -13,6 +13,8 @@ export const store = proxy({
         firstName: '',
         lastName: '',
         email: '',
+        contact: '',
+        isSuperAdmin: false,
         isAdmin: false,
         isUserDocEmpty: false,
         isLoggedIn: false
