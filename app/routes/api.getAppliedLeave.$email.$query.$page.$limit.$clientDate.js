@@ -81,14 +81,14 @@ export const loader = async ({ params, request }) => {
                 { $unwind: "$userDetails" }
             )
 
-            const approvedDateFilter = {}
-            const startDate = new Date(params.clientDate)
+            // const approvedDateFilter = {}
+            // const startDate = new Date(params.clientDate)
             // console.log('params.clientDate', params.clientDate);
             // console.log('startDate.........', startDate);
-            approvedDateFilter.$gte = startDate
-            basePipeline.push({
-                $match: { "startDate": approvedDateFilter }
-            })
+            // approvedDateFilter.$gte = startDate
+            // basePipeline.push({
+            //     $match: { "startDate": approvedDateFilter }
+            // })
 
             if (query.queryKeyword !== 'All') {
                 // console.log('hit not all not params.email queryRegex', queryRegex);
