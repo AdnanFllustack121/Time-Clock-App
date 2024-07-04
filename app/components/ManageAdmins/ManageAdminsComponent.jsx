@@ -6,6 +6,7 @@ import { showToast } from '../Toast';
 import { useSnapshot } from 'valtio';
 import { store } from '../../valtio/store';
 import moment from 'moment'
+import ManageAdminsModal from './ManageAdminsModal';
 
 export default function ManageAdminsComponent() {
     const [allUsers, setAllUsers] = useState([])
@@ -18,6 +19,11 @@ export default function ManageAdminsComponent() {
     const snap = useSnapshot(store)
     const [queryValue, setQueryValue] = useState('');
     const [actionID, setActionID] = useState('')
+
+    const [getActiveUser, setActiveUser] = useState(null);
+    const [getModalActive, setModalActive] = useState(false);
+    const [getType, setType] = useState("");
+
 
     useEffect(() => {
         // console.log('totalPages', totalPages);
@@ -46,7 +52,7 @@ export default function ManageAdminsComponent() {
                 } = await response.json()
 
                 console.log('totalPages, hasNextPage, hasPrevPage', totalPages, hasNextPage, hasPrevPage);
-                setAllUsers(data)
+                setAllUsers(data ?? [])
                 setHasNextPage(hasNextPage)
                 setHasPrevPage(hasPrevPage)
                 setTotalPages(totalPages);
@@ -63,6 +69,7 @@ export default function ManageAdminsComponent() {
         return (currentPage - 1) * itemsPerPage + index + 1;
     };
 
+    const toggleModal = () => getModalActive == true ? setModalActive(false) : setModalActive(true);
 
     return (
         <>
@@ -87,12 +94,43 @@ export default function ManageAdminsComponent() {
                             setQueryValue={setQueryValue}
                             queryValue={queryValue}
                             calculateItemNumber={calculateItemNumber}
+                            setActiveUser={setActiveUser}
+                            setModalActive={setModalActive}
+                            setType={setType}
                         />
                     </section>
                 </div>
 
             </div>
+            <ManageAdminsModal
+                isTrue={getModalActive}
+                type={getType}
+                primaryContent={"Save"}
+                secondaryContent={"Cancel"}
+                getActiveUser={getActiveUser}
+                toggleModal={toggleModal}
+                handleManageAdminStatus={handleManageAdminStatus}
+            />
 
         </>
     )
+
+    async function handleManageAdminStatus(type, userId) {
+        try {
+            const response = await fetch("/api/admin/status", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ type, userId })
+            }).then(response => response.json());
+
+            if (response.success == true) {
+                setModalActive(false);
+                fetchAllUsers();
+            }
+        } catch (error) {
+            console.log("handleManageAdminStatus Error", error);
+        }
+    }
 }

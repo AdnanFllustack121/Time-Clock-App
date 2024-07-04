@@ -16,10 +16,18 @@ export default function ManageAdminTable({ allUsers,
     hasNextPage,
     hasPrevPage,
     setQueryValue,
-    queryValue, calculateItemNumber }) {
+    queryValue,
+    calculateItemNumber,
+    setActiveUser,
+    setModalActive, setType }) {
 
     const { mode, setMode } = useSetIndexFiltersMode();
 
+    const handleButtonClick = (status, userDetails) => {
+        setType(status);
+        setModalActive(true);
+        setActiveUser(userDetails);
+    }
 
     const rowMarkup =
         allUsers.length <= 0 ? [] : allUsers?.map(({ _id, firstName, lastName, isAdmin, email, contact }, i) => {
@@ -34,7 +42,7 @@ export default function ManageAdminTable({ allUsers,
                     <IndexTable.Cell>{isAdmin ? <p style={{ color: 'rgb(80, 148, 95)' }}>Yes</p> : <p style={{ color: 'rgb(238, 78, 78)' }}>No</p>}</IndexTable.Cell>
                     <IndexTable.Cell>
                         <div className='adminAction'>
-                            {isAdmin ? <Button tone='critical'>Revoke Admin</Button> : <Button>Assign Admin</Button>}
+                            {isAdmin ? <Button tone='critical' onClick={() => handleButtonClick("revokeAdmin", { _id, firstName, lastName, email })}>Revoke Admin</Button> : <Button onClick={() => handleButtonClick("assignAdmin", { _id, firstName, lastName, email })}>Assign Admin</Button>}
                         </div>
                     </IndexTable.Cell>
                 </IndexTable.Row>
