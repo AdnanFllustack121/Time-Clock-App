@@ -127,6 +127,7 @@ export default function ManageAdminsComponent() {
 
             if (response.success == true) {
                 setModalActive(false);
+                showToast(response.message);
                 fetchAllUsers();
             }
         } catch (error) {

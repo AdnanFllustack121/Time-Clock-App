@@ -25,6 +25,16 @@ function formatTime(time) {
     return moment(time).format('hh:mm:ss A');
 }
 
+function formatISODateFormat(date_time) {
+    if (date_time != null) {
+        let date_arr = date_time.split(":");
+        let new_date_arr = [];
+        for (let i = 0; i < date_arr.length - 1; i++) new_date_arr.push(date_arr[i]);
+        return new_date_arr.join(':');
+    }
+    return "";
+}
+
 function calculateDuration(inTime, outTime, forTotal, shiftRecords) {
     let diffInMilliseconds = 0;
 
@@ -57,14 +67,15 @@ const EmployeesClockTable = ({
     queryValue,
     setDateFilter,
     dateFilter,
-    setShiftRecords
+    setShiftRecords,
+    fetchShiftRecords
 }) => {
     const [totalDuration, setTotalDuration] = useState("--");
     const { mode, setMode } = useSetIndexFiltersMode();
     const [isLoadingButton, setLoadingButton] = useState(false);
     const [openClockOutModal, setOpenClockOutModal] = useState({ isOpen: false, type: '', idToAction: '' });
     const [clockOutFields, setClockOutFields] = useState({ out_time: '', note: '' });
-    const [adminEditFields, setAdminEditFields] = useState({ out_time: '', in_time: '', in_date: '', out_date: '' });
+    const [adminEditFields, setAdminEditFields] = useState({ out_datetime: '', in_datetime: '' });
     const snap = useSnapshot(store);
 
     const handleSelectingStartDate = useCallback((value) => {
@@ -95,7 +106,25 @@ const EmployeesClockTable = ({
         }
     }, [isLoadingTable, shiftRecords]);
 
+    function convertToBrowserLocalTime(utcDateString) {
+        const date = new Date(utcDateString);
+        const offset = date.getTimezoneOffset();
+        date.setMinutes(date.getMinutes() - offset);
+        const localISOString = date.toISOString().slice(0, -1);
+        return localISOString;
+    }
+
     const toggleModal = (type, id) => {
+        if (type == "adminEdit") {
+            const getRecord = shiftRecords.find((record) => record._id == id);
+
+            setAdminEditFields({
+                id,
+                out_datetime: getRecord.out_time == null ? null : formatISODateFormat(convertToBrowserLocalTime(getRecord.out_time)),
+                in_datetime: getRecord.in_time == null ? null : formatISODateFormat(convertToBrowserLocalTime(getRecord.in_time))
+            });
+        }
+
         setOpenClockOutModal(prev => ({
             isOpen: !prev.isOpen,
             type: prev.isOpen ? '' : type,
@@ -186,9 +215,48 @@ const EmployeesClockTable = ({
         </IndexTable.Row>
     ));
 
-    const handleEdit = () => {
+    const handleEdit = async () => {
+        let response;
+        if (adminEditFields.out_datetime == null) {
+            response = await fetch("/api/edit/shiftTime", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: adminEditFields.id,
+                    in_time: new Date(adminEditFields.in_datetime),
+                    type: "single"
+                })
+            }).then(response => response.json());
+        } else {
 
+            if (new Date(adminEditFields.in_datetime) > new Date(adminEditFields.out_datetime)) {
+                showToast("Clock-out time cannot be earlier than the clock-in time.", true);
+                return;
+            }
+
+            response = await fetch("/api/edit/shiftTime", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: adminEditFields.id,
+                    in_time: new Date(adminEditFields.in_datetime),
+                    out_time: new Date(adminEditFields.out_datetime),
+                    type: "all"
+                })
+            }).then(response => response.json());
+        }
+
+        if (response.success == true) {
+            toggleModal();
+            showToast(response.message);
+            fetchShiftRecords();
+        }
     }
+
     const handleAdminInputClockChange = useCallback((data, type) => {
         if (openClockOutModal.type === "adminClockOut") {
             setClockOutFields(prev => ({

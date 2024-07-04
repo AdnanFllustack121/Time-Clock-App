@@ -12,7 +12,7 @@ export default function ModalComponent({ isTrue, toggleModal, handlePrimaryActio
         <Modal
             open={isTrue}
             onClose={toggleModal}
-            title={type === "reason" ? sectionContent : type === "adminClockOut" ? 'Please fill all the fields correctly.' : "Confirmation"}
+            title={type === "reason" ? sectionContent : type === "adminClockOut" ? 'Please fill all the fields correctly.' : type == "adminEdit" ? "Update Shift Timings" : "Confirmation"}
             primaryAction={{
                 content: primaryContent,
                 onAction: handlePrimaryAction,
@@ -52,6 +52,38 @@ export default function ModalComponent({ isTrue, toggleModal, handlePrimaryActio
                             multiline={4}
                             autoComplete="off"
                         />
+                    </>
+                }
+                {type === "adminEdit" &&
+                    <>
+                        <FormLayout>
+                            {
+                                value?.in_datetime != null && <FormLayout.Group condensed>
+                                    <TextField
+                                        label="Select In Date and Time:"
+                                        value={value?.in_datetime}
+                                        onChange={(_v) => handleAdminInputChange(_v, 'in_datetime')}
+                                        type='datetime-local'
+                                        autoComplete="off"
+                                    />
+                                    <input style={{ visibility: 'hidden' }} />
+                                    <input style={{ visibility: 'hidden' }} />
+                                </FormLayout.Group>
+                            }
+                            {
+                                value?.out_datetime != null && <FormLayout.Group condensed>
+                                    <TextField
+                                        label="Select Out Date and Time:"
+                                        value={value?.out_datetime}
+                                        onChange={(_v) => handleAdminInputChange(_v, 'out_datetime')}
+                                        type='datetime-local'
+                                        autoComplete="off"
+                                    />
+                                    <input style={{ visibility: 'hidden' }} />
+                                    <input style={{ visibility: 'hidden' }} />
+                                </FormLayout.Group>
+                            }
+                        </FormLayout>
                     </>
                 }
 

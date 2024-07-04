@@ -119,6 +119,7 @@ export default function EmployeeShiftRecords() {
                             setDateFilter={setDateFilter}
                             dateFilter={dateFilter}
                             setShiftRecords={setShiftRecords}
+                            fetchShiftRecords={fetchShiftRecords}
                         />
                     </section>
                 </div>
