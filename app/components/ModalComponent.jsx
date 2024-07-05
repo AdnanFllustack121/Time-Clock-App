@@ -12,19 +12,25 @@ export default function ModalComponent({ isTrue, toggleModal, handlePrimaryActio
         <Modal
             open={isTrue}
             onClose={toggleModal}
-            title={type === "reason" ? sectionContent : type === "adminClockOut" ? 'Please fill all the fields correctly.' : type == "adminEdit" ? "Update Shift Timings" : "Confirmation"}
+            title={
+                type === "reason" ? sectionContent :
+                type === "adminClockOut" ? 'Please fill all the fields correctly.' :
+                type == "adminEdit" ? "Update Shift Timings" :
+                type == "viewProfile" ? "User Details" :
+                "Confirmation"
+            }
             primaryAction={{
                 content: primaryContent,
                 onAction: handlePrimaryAction,
                 destructive: type === 'delete' ? true : false,
                 loading: isLoadingButton
             }}
-            secondaryActions={[
-                {
+            secondaryActions={
+                type != "viewProfile" && [{
                     content: secondaryContent,
                     onAction: toggleModal,
-                },
-            ]}
+                }]
+            }
         >
             <Modal.Section>
                 {type === "adminClockOut" &&
@@ -98,6 +104,60 @@ export default function ModalComponent({ isTrue, toggleModal, handlePrimaryActio
                         />
                     </>
                     : type === "adminClockOut" ? '' : sectionContent
+                }
+                {
+                    type === "viewProfile" &&
+                    <>
+                        <FormLayout>
+                            <FormLayout.Group condensed>
+                                <TextField
+                                    value={value?.firstName}
+                                    label="First Name"
+                                    type='text'
+                                    autoComplete="off"
+                                    readOnly
+                                />
+                                <TextField
+                                    value={value?.lastName}
+                                    label="Last Name"
+                                    type='text'
+                                    autoComplete="off"
+                                    readOnly
+                                />
+                            </FormLayout.Group>
+                            <FormLayout.Group condensed>
+                                <TextField
+                                    value={value?.email}
+                                    label="Email"
+                                    type='email'
+                                    autoComplete="off"
+                                    readOnly
+                                />
+                                <TextField
+                                    value={value?.contact}
+                                    label="Contact Number"
+                                    type='number'
+                                    autoComplete="off"
+                                    readOnly
+                                />
+                            </FormLayout.Group>
+                            <FormLayout.Group condensed>
+                                <TextField
+                                    value={
+                                        value?.isSuperAdmin == true ? "Super Admin" :
+                                        value?.isAdmin == true ? "Admin" :
+                                        value?.isAdmin == false ? "Employee" :
+                                        "User"
+                                    }
+                                    label="Role"
+                                    type='text'
+                                    autoComplete="off"
+                                    readOnly
+                                />
+                                <div></div>
+                            </FormLayout.Group>
+                        </FormLayout>
+                    </>
                 }
             </Modal.Section>
         </Modal>

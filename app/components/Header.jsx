@@ -4,10 +4,14 @@ import { useSnapshot } from 'valtio';
 import { store } from '../valtio/store';
 import { useNavigate } from '@remix-run/react';
 import { showToast } from './Toast';
+import { ViewIcon, ExitIcon } from '@shopify/polaris-icons';
+import ModalComponent from './ModalComponent';
 
 export default function Header({ title, component }) {
     const snap = useSnapshot(store)
     const navigate = useNavigate()
+
+    const [getModalActive, setModalActive] = React.useState(false);
 
     const handleLogout = useCallback(() => {
         localStorage.removeItem("time_clock_token")
@@ -25,6 +29,8 @@ export default function Header({ title, component }) {
         navigate('/app/Login')
     }, [])
 
+    const toggleModal = () => !getModalActive ? setModalActive(true) : setModalActive(false);
+
     return (
         <Page
             title={title}
@@ -33,13 +39,22 @@ export default function Header({ title, component }) {
                 {
                     title: 'More',
                     actions: [
-                        { content: `Hi, ${snap.user.firstName} ${snap.user.lastName}` },
-                        { content: 'Logout', onAction: handleLogout },
+                        { content: 'Profile', icon: ViewIcon, onAction: toggleModal },
+                        { content: 'Logout', onAction: handleLogout, icon: ExitIcon, destructive: true },
                     ],
                 },
             ]}
         >
             {component}
+
+            <ModalComponent
+                isTrue={getModalActive}
+                toggleModal={toggleModal}
+                handlePrimaryAction={toggleModal}
+                type={"viewProfile"}
+                primaryContent="Close"
+                value={snap.user}
+            />
         </Page>
     );
 }

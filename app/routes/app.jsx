@@ -9,6 +9,7 @@ import ToastExample from "../components/Toast";
 import '../components/appStyle/app.css';
 import { useSnapshot } from "valtio";
 import { store } from "../valtio/store";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
@@ -23,38 +24,40 @@ export default function App() {
   const snap = useSnapshot(store)
 
   return (
-    <AppProvider isEmbeddedApp apiKey={apiKey}>
-      <NavMenu>
-        {snap.user.isLoggedIn && <Link
-          to="/app"
-          rel="home"
-        >
-          Home
-        </Link>}
-        {snap.user.isLoggedIn && <Link
-          to="/app/myLeave"
-        >
-          My Leave
-        </Link>}
-        {(snap.user.isAdmin || snap.user.isSuperAdmin) && snap.user.isLoggedIn && <Link
-          to="/app/shiftRecords"
-        >
-          Shift Records
-        </Link>}
-        {(snap.user.isAdmin || snap.user.isSuperAdmin) && snap.user.isLoggedIn && <Link
-          to="/app/leaveRequests"
-        >
-          Leave Requests
-        </Link>}
-        {snap.user.isSuperAdmin && snap.user.isLoggedIn && <Link
-          to="/app/ManageAdmins"
-        >
-          Manage Admins
-        </Link>}
-      </NavMenu>
-      <Outlet />
-      <ToastExample />
-    </AppProvider>
+    <GoogleOAuthProvider clientId="993035188467-m6j4ag82khvgujbpbq3r6pq4f6552nrq.apps.googleusercontent.com">
+      <AppProvider isEmbeddedApp apiKey={apiKey}>
+        <NavMenu>
+          {snap.user.isLoggedIn && <Link
+            to="/app"
+            rel="home"
+          >
+            Home
+          </Link>}
+          {snap.user.isLoggedIn && <Link
+            to="/app/myLeave"
+          >
+            My Leave
+          </Link>}
+          {(snap.user.isAdmin || snap.user.isSuperAdmin) && snap.user.isLoggedIn && <Link
+            to="/app/shiftRecords"
+          >
+            Shift Records
+          </Link>}
+          {(snap.user.isAdmin || snap.user.isSuperAdmin) && snap.user.isLoggedIn && <Link
+            to="/app/leaveRequests"
+          >
+            Leave Requests
+          </Link>}
+          {snap.user.isSuperAdmin && snap.user.isLoggedIn && <Link
+            to="/app/ManageAdmins"
+          >
+            Manage Admins
+          </Link>}
+        </NavMenu>
+        <Outlet />
+        <ToastExample />
+      </AppProvider>
+    </GoogleOAuthProvider>
   );
 }
 

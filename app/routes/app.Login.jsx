@@ -13,6 +13,7 @@ import {
 import Placeholder from "../components/placeholder";
 import { showToast } from "../components/Toast";
 import { useNavigate } from "@remix-run/react";
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function Signup() {
     const [formValues, setFormValues] = useState({
@@ -175,6 +176,15 @@ export default function Signup() {
                                         <div>
                                             <Link url="/app/Signup" style={{ fontSize: '14px', textDecoration: 'underline' }}>Sign up for an account</Link>
                                         </div>
+                                        <div style={{ paddingTop: "2%" }}>
+                                            <GoogleLogin
+                                                onSuccess={credentialResponse => handleGoogleLogin(credentialResponse)}
+                                                onError={() => {
+                                                    console.log('Login Failed');
+                                                }}
+                                                useOneTap
+                                            />
+                                        </div>
                                     </div>
                                 </FormLayout>
                             </Form>
@@ -190,4 +200,18 @@ export default function Signup() {
             </Card>
         </Page>
     );
+
+    async function handleGoogleLogin(encoded_data) {
+        try {
+            await fetch("/api/google/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ ...encoded_data })
+            })
+        } catch (error) {
+            console.log("ERROR", error);
+        }
+    }
 }
