@@ -58,16 +58,13 @@ export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurren
     ];
 
     const removeStartDateFilter = () => {
-        // console.log('startDate clear hit');
         setDateFilter((_p) => ({
             ..._p,
             startDate: '',
         }))
-
     }
 
     const removeEndDateFilter = () => {
-        // console.log('endDate clear hit');
         setDateFilter((_p) => ({
             ..._p,
             endDate: ''
@@ -117,7 +114,6 @@ export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurren
         myLeaveRecords.length <= 0 ? [] : myLeaveRecords?.map(({ _id, startDate, endDate, reason, type, createdAt, status }, i) => {
 
             const differenceInMilliseconds = new Date(endDate) - new Date(startDate);
-            // console.log('differecencemillicsescjnds', differenceInMilliseconds);
             const millisecondsInDay = 1000 * 60 * 60 * 24;
 
             const days = Math.floor(differenceInMilliseconds / millisecondsInDay);

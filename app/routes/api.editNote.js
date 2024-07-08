@@ -5,8 +5,6 @@ import AttendanceModel from "../MONGODB/Attendance";
 
 export const action = async ({ request }) => {
     const data = JSON.parse(await request.text())
-    console.log('data from editNote', data);
-
 
     try {
         const { admin, session } = await authenticate.admin(request);
@@ -14,8 +12,6 @@ export const action = async ({ request }) => {
         const attendanceData = await AttendanceModel.findOneAndUpdate({ _id: data.idToUpdate }, {
             note: data.note
         }, { new: true })
-
-        console.log('attendanceData from editNote', attendanceData);
 
         return json({
             message: 'Note updated successfully',

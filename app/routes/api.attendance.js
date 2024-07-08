@@ -5,8 +5,6 @@ import AttendanceModel from "../MONGODB/Attendance";
 
 export const action = async ({ request }) => {
     const data = JSON.parse(await request.text())
-    console.log('data from attendance', data);
-
 
     try {
         const { admin, session } = await authenticate.admin(request);

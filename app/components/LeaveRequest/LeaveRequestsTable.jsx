@@ -58,7 +58,6 @@ export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable
     ];
 
     const removeStartDateFilter = () => {
-        // console.log('startDate clear hit');
         setDateFilter((_p) => ({
             ..._p,
             startDate: '',
@@ -67,7 +66,6 @@ export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable
     }
 
     const removeEndDateFilter = () => {
-        // console.log('endDate clear hit');
         setDateFilter((_p) => ({
             ..._p,
             endDate: ''
@@ -113,7 +111,6 @@ export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable
         leaveRequestRecords.length <= 0 ? [] : leaveRequestRecords?.map(({ _id, startDate, endDate, reason, type, createdAt, status, userDetails }, i) => {
 
             const differenceInMilliseconds = new Date(endDate) - new Date(startDate);
-            // console.log('differecencemillicsescjnds', differenceInMilliseconds);
             const millisecondsInDay = 1000 * 60 * 60 * 24;
 
             const days = Math.floor(differenceInMilliseconds / millisecondsInDay);

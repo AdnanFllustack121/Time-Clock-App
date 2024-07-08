@@ -4,9 +4,7 @@ import LeaveModal from "../MONGODB/LeaveModal."
 import userModel from "../MONGODB/UserModel"
 
 export const action = async ({ request }) => {
-
     const data = JSON.parse(await request.text())
-    // console.log('data  from leaveActionAdmin.......', data);
 
     try {
 
@@ -20,9 +18,6 @@ export const action = async ({ request }) => {
 
         const userData = await userModel.findOne({ email: updatedData.createdBy })
 
-        // console.log('updatedData from leaveActionAdmin', updatedData);
-        // console.log('userData from leaveActionAdmin', userData);
-
         if (updatedData) {
             return json(({
                 data: updatedData,
@@ -34,7 +29,6 @@ export const action = async ({ request }) => {
                 message: "Something went wrong while updating status of leave."
             })
         }
-
 
     } catch (error) {
         console.log('error occured on leaveActionAdmin', error);

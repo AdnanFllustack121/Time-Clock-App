@@ -12,8 +12,6 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-// console.log('process.env.MONGODB_URI:   ', process.env.MONGODB_URI);
-
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",

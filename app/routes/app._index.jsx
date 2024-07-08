@@ -16,7 +16,6 @@ export default function Index() {
 
     async function doVerification() {
       const isVerified = await verifyUser();
-      console.log("isVerified...........>>", isVerified);
       if (!isVerified) {
         navigate("/app/login");
       } else {

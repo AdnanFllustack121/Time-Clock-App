@@ -3,11 +3,6 @@ import { store } from "../../valtio/store";
 
 export async function verifyUser() {
     const timeClockToken = localStorage.getItem("time_clock_token");
-    console.log('timeClockToken', timeClockToken);
-    // if (!timeClockToken) {
-    //     return false;
-    // }
-    // console.log('timeClockToken below return');
 
     try {
         const response = await fetch(
@@ -23,8 +18,6 @@ export async function verifyUser() {
         );
 
         const { status, user, message, isUserDocEmpty } = await response.json();
-
-        console.log('status, user, message, isUserDocEmpty', status, '  ', user, '  ', message, '  ', isUserDocEmpty);
 
         store.user = {
             firstName: user ? user.firstName : '',

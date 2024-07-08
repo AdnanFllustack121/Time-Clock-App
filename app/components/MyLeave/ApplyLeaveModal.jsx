@@ -15,7 +15,6 @@ export default function ApplyLeaveModal({ isTrue, toggleModal, handlePrimaryActi
     ];
 
     const handleChange = (_data, key) => {
-        console.log('value', _data);
         setValue((prev) => ({
             ...prev,
             [key]: _data,

@@ -5,7 +5,6 @@ import LeaveModal from "../MONGODB/LeaveModal.";
 
 export const action = async ({ request }) => {
     const data = JSON.parse(await request.text())
-    console.log('data from leaveAction', data);
 
     try {
         const { admin, session } = await authenticate.admin(request);

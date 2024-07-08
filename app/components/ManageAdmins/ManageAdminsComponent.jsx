@@ -26,14 +26,11 @@ export default function ManageAdminsComponent() {
 
 
     useEffect(() => {
-        // console.log('totalPages', totalPages);
         fetchAllUsers();
-        // console.log('currentPage', currentPage);
     }, [currentPage, queryValue,]);
 
 
     const fetchAllUsers = async () => {
-        console.log('hit fetchAllUsers');
         const query = queryValue.length > 0 ? queryValue : 'All'
         const queryParams = JSON.stringify(query)
 
@@ -51,7 +48,6 @@ export default function ManageAdminsComponent() {
                     totalPages, hasNextPage, hasPrevPage
                 } = await response.json()
 
-                console.log('totalPages, hasNextPage, hasPrevPage', totalPages, hasNextPage, hasPrevPage);
                 setAllUsers(data ?? [])
                 setHasNextPage(hasNextPage)
                 setHasPrevPage(hasPrevPage)

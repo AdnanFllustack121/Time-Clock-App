@@ -55,15 +55,11 @@ export default function MyLeaveComponent() {
       isInitialRender.current = false;
       return;
     }
-    // console.log('totalPages', totalPages);
     fetchMyLeaveRecords();
-    // console.log('currentPage', currentPage);
-    // console.log('currentQueryPage', currentQueryPage);
   }, [currentPage, queryValue, currentQueryPage, dateFilter,]);
 
 
   const fetchMyLeaveRecords = async () => {
-    // console.log('hit fetchMyLeaveRecords');
     const query = {
       queryKeyword: queryValue.length > 0 ? queryValue : 'All',
       startDate: dateFilter.startDate ? moment(dateFilter.startDate).format('MMM DD, YYYY') : false,
@@ -74,7 +70,6 @@ export default function MyLeaveComponent() {
 
     try {
       const queryParams = JSON.stringify(query)
-      // console.log('queryParams', queryParams);
 
       const response = await fetch(`/api/getAppliedLeave/${snap.user.email}/${queryParams}/
           ${page}/${itemsPerPage}/${false}`, {
@@ -89,8 +84,6 @@ export default function MyLeaveComponent() {
         setMyLeaveRecords(data)
         setHasNextPage(hasNextPageS)
         setHasPrevPage(hasPrevPageS)
-        // console.log('data from myleavecomponent', data);
-        // console.log('Math.ceil(totalItemsS / limit)', Math.ceil(totalItemsS / limit));
         setTotalPages(Math.ceil(totalItemsS / limit));
 
       }
@@ -101,7 +94,6 @@ export default function MyLeaveComponent() {
   }
 
   const toggleLeaveModal = () => {
-    // console.log('hit toggleLeaveModal');
     setLeaveModal((prev) => ({
       isOpen: !prev.isOpen,
       type: prev.isOpen ? '' : 'applyLeave',
@@ -143,7 +135,6 @@ export default function MyLeaveComponent() {
 
       if (response.ok) {
         const { message, data } = await response.json()
-        // console.log('data from apply leave response', data);
         showToast(message)
         setFormValues({
           leaveType: '',
@@ -165,14 +156,12 @@ export default function MyLeaveComponent() {
   };
 
   const toggleActionModal = (id, type) => {
-    // console.log('hit toggleActionModal', id, '  ', type);
     if (id) {
       setActionID(id)
     }
     if (type === 'edit') {
       if (id) {
         const dataToUpdate = myLeaveRecords.filter(_d => _d._id === id)[0]
-        // console.log('dataToUpdata:', dataToUpdate);
         setFormValues({
           leaveType: dataToUpdate.type,
           leaveReason: dataToUpdate.reason,
@@ -191,7 +180,6 @@ export default function MyLeaveComponent() {
           leaveStatus: 'Pending'
         })
       }
-      // console.log('leaveModal', leaveModal);
       setLeaveModal((prev) => {
         return ({
           type: prev.isOpen ? '' : 'edit',
@@ -207,7 +195,6 @@ export default function MyLeaveComponent() {
   }
 
   const handleDeleteLeave = async () => {
-    // console.log('hit delete leave! id of delete', actionID);
     try {
       const apiData = {
         type: 'delete',
@@ -224,14 +211,7 @@ export default function MyLeaveComponent() {
       if (response.ok) {
         const { message, data } = await response.json()
         showToast(message)
-        // console.log('data from handleDeleteLeave', data)
-        // setMyLeaveRecords(prev => {
-        //   return prev.filter(_d => _d._id !== data._id)
-        // })
-
-
         fetchMyLeaveRecords()
-
       }
     } catch (error) {
       console.log('error while deleting leave!', error);
@@ -243,8 +223,6 @@ export default function MyLeaveComponent() {
   }
 
   const handleEditLeave = async () => {
-    // console.log('hit edit leave! formValues:', formValues);
-
     try {
       const apiData = {
         ...formValues,
@@ -260,24 +238,15 @@ export default function MyLeaveComponent() {
       })
 
       if (response.ok) {
-        const { message, data } = await response.json()
-        showToast(message)
-        // console.log('data from handleEditLeave', data);
-        fetchMyLeaveRecords()
-        // setMyLeaveRecords(prev => {
-        //   return prev.map(_d => {
-        //     if (_d._id === data._id) {
-        //       return data
-        //     }
-        //     return _d
-        //   })
-        // })
+        const { message, data } = await response.json();
+        showToast(message);
+        fetchMyLeaveRecords();
       }
     } catch (error) {
       console.log('error while editing leave!', error);
     } finally {
-      setActionID('')
-      toggleActionModal(null, 'edit')
+      setActionID('');
+      toggleActionModal(null, 'edit');
     }
 
   }

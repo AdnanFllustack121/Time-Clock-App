@@ -46,9 +46,7 @@ function EmployeeClockInOut() {
 
         if (response.ok) {
           const { message, attendanceData } = await response.json()
-          console.log('data from getAttendance', attendanceData);
           const isClockedOutLast = attendanceData[attendanceData?.length - 1]?.out_time
-          console.log('isClockedInLast', isClockedOutLast);
           isClockedOutLast === null && setClockedIn(true)
           setTodaysAttendance(attendanceData)
 
@@ -72,8 +70,6 @@ function EmployeeClockInOut() {
       status: 'Incomplete',
 
     }
-    // console.log('in-time apiData', apiData);
-
 
     try {
       const response = await fetch('/api/attendance', {
@@ -86,7 +82,6 @@ function EmployeeClockInOut() {
 
       if (response.ok) {
         const { message, attendanceData } = await response.json()
-        console.log('response of clockin.......', attendanceData);
         setTodaysAttendance(prevAttendance => [...prevAttendance, attendanceData]);
         setClockedIn(true);
         showToast(message)
@@ -99,14 +94,6 @@ function EmployeeClockInOut() {
     } finally {
       setLoadingButton(false)
     }
-
-
-    //button effect but not working due to tone I have set in Button
-    // const clockInButton = document.getElementById('clockInButton')
-    // clockInButton.classList.add('clock-in-effect');
-    // setTimeout(() => {
-    //   clockInButton.classList.remove('clock-in-effect');
-    // }, 1000);
   }, [])
 
   const handleClockOut = useCallback(async () => {
@@ -121,7 +108,6 @@ function EmployeeClockInOut() {
       note: note,
       idToUpdate
     }
-    console.log('out-time apiData', apiData);
 
     try {
       const response = await fetch('/api/attendance', {
@@ -134,7 +120,6 @@ function EmployeeClockInOut() {
 
       if (response.ok) {
         const { message, attendanceData } = await response.json()
-        console.log('response of clockout.......', attendanceData);
 
         setClockedIn(true);
         showToast(message)
@@ -156,13 +141,6 @@ function EmployeeClockInOut() {
     }
 
     setClockedIn(false);
-
-    //button effect but not working due to tone I have set in Button
-    // const clockOutButton = document.getElementById('clockOutButton')
-    // clockOutButton.classList.add('clock-out-effect');
-    // setTimeout(() => {
-    //   clockOutButton.classList.remove('clock-out-effect');
-    // }, 1000);
   }, [note, todaysAttendance])
 
   const handleViewNote = (id, noteToView) => {

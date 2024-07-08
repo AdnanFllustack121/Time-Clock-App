@@ -9,12 +9,7 @@ import { createSecretToken } from "../components/authentications/createSecretTok
 export const action = async ({ request }) => {
     const data = JSON.parse(await request.text())
     const { email, password } = data
-    console.log('data get from login', {
-        email,
-        password,
-    })
-
-
+    
     try {
         const { admin, session } = await authenticate.admin(request);
 

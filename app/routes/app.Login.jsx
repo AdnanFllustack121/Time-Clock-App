@@ -42,10 +42,6 @@ export default function Signup() {
     const handleSubmit = useCallback(async () => {
         try {
             setLoading(true);
-            console.log('submit event login', {
-                email,
-                password
-            });
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             const passwordRegex = /^.{8,}$/;
@@ -87,7 +83,6 @@ export default function Signup() {
                 const { message, status, error, token } = await response.json();
                 showToast(message, error);
                 if (status) {
-                    console.log('message', message);
                     localStorage.setItem("time_clock_token", token);
                     setTimeout(() => {
                         navigate("/app");
@@ -180,8 +175,13 @@ export default function Signup() {
                                             <GoogleLogin
                                                 onSuccess={credentialResponse => handleGoogleLogin(credentialResponse)}
                                                 onError={() => {
-                                                    console.log('Login Failed');
+                                                    return alert("GOOGLE LOGIN FAILED, PLEASE TRY AGAIN");
                                                 }}
+                                                type="standard"
+                                                theme="filled_blue"
+                                                size="medium"
+                                                text="signin_with"
+                                                shape="circle"
                                                 useOneTap
                                             />
                                         </div>
@@ -203,13 +203,28 @@ export default function Signup() {
 
     async function handleGoogleLogin(encoded_data) {
         try {
-            await fetch("/api/google/login", {
+            const response = await fetch("/api/google/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({ ...encoded_data })
-            })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                const errorMessage = errorData?.message || "Login failed. Please check your details.";
+                showToast(errorMessage, true);
+            } else {
+                const { message, status, error, token } = await response.json();
+                showToast(message, error);
+                if (status) {
+                    localStorage.setItem("time_clock_token", token);
+                    setTimeout(() => {
+                        navigate("/app");
+                    }, 1000);
+                }
+            }
         } catch (error) {
             console.log("ERROR", error);
         }

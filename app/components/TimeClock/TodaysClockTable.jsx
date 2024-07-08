@@ -19,7 +19,6 @@ function formatTime(time) {
 
 function calculateDuration(inTime, outTime, forTotal, todaysAttendance) {
   let diffInMilliseconds = 0
-  // console.log('inTime, outTime', inTime, outTime);
   if (forTotal) {
     todaysAttendance.forEach(({ in_time, out_time }) => {
       if (out_time) {
@@ -30,7 +29,6 @@ function calculateDuration(inTime, outTime, forTotal, todaysAttendance) {
     if (outTime) diffInMilliseconds = Math.abs(new Date(outTime) - new Date(inTime));
   }
 
-  // console.log('diffInMilliseconds',diffInMilliseconds);
   const hours = Math.floor(diffInMilliseconds / 3600000);
   const minutes = Math.floor((diffInMilliseconds % 3600000) / 60000);
   const seconds = Math.floor((diffInMilliseconds % 60000) / 1000);

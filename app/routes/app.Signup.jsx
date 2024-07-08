@@ -39,7 +39,6 @@ export default function Signup() {
         async function doVerification() {
             try {
                 const isVerified = await verifyUser();
-                console.log("isVerified:", isVerified);
                 setVerified(true);
             } catch (error) {
                 console.error('Error verifying user:', error);
@@ -111,18 +110,17 @@ export default function Signup() {
             } else {
                 const { message, token, user } = await response.json();
                 if (token) {
-                    console.log('message', message);
                     localStorage.setItem("time_clock_token", token);
-                    store.user = {
-                        ...snap.user,
-                        firstName: user ? user.firstName : '',
-                        lastName: user ? user.lastName : '',
-                        email: user ? user.email : '',
-                        contact: user ? user.contact : '',
-                        isSuperAdmin: user ? user.isSuperAdmin : false,
-                        isAdmin: user ? user.isAdmin : false,
-                        isLoggedIn: true
-                    }
+                    // store.user = {
+                    //     ...snap.user,
+                    //     firstName: user ? user.firstName : '',
+                    //     lastName: user ? user.lastName : '',
+                    //     email: user ? user.email : '',
+                    //     contact: user ? user.contact : '',
+                    //     isSuperAdmin: user ? user.isSuperAdmin : false,
+                    //     isAdmin: user ? user.isAdmin : false,
+                    //     isLoggedIn: true
+                    // }
                     setTimeout(() => {
                         navigate("/app");
                     }, 1000);

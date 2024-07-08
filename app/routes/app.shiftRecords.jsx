@@ -18,7 +18,6 @@ export default function shiftRecords() {
 
         async function doVerification() {
             const isVerified = await verifyUser();
-            console.log("isVerified from MyLeave...........>>", isVerified);
             if (!isVerified) {
                 navigate("/app/login");
             } else {

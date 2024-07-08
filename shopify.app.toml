@@ -3,7 +3,7 @@
 client_id = "dfd369953b428513d8d8791521263944"
 name = "Time Clock"
 handle = "time-clock-1"
-application_url = "https://asus-emission-landscapes-tommy.trycloudflare.com"
+application_url = "https://switch-sending-album-obituaries.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = ""
 
 [auth]
 redirect_urls = [
-  "https://asus-emission-landscapes-tommy.trycloudflare.com/auth/callback",
-  "https://asus-emission-landscapes-tommy.trycloudflare.com/auth/shopify/callback",
-  "https://asus-emission-landscapes-tommy.trycloudflare.com/api/auth/callback"
+  "https://switch-sending-album-obituaries.trycloudflare.com/auth/callback",
+  "https://switch-sending-album-obituaries.trycloudflare.com/auth/shopify/callback",
+  "https://switch-sending-album-obituaries.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

@@ -14,10 +14,6 @@ export const loader = async ({ request, params }) => {
         let hasNextPage;
         let hasPrevPage;
 
-        console.log('limit from getAllUsers', limit);
-        console.log('page from getAllUsers', page);
-        console.log('query from getAllUsers', query);
-
         const queryRegex = query !== 'All' ? new RegExp(query.replace(/\s+/g, '\\s*'), 'i') : /.*/;
 
         const matchStage = query !== 'All' ? {
@@ -64,8 +60,6 @@ export const loader = async ({ request, params }) => {
         ];
 
         const gotAllUsers = await userModel.aggregate(pipeline);
-
-        // console.log('gotAllUsers..............', gotAllUsers);
 
         return json({
             message: "Got all users successfully",

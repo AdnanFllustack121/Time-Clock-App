@@ -9,7 +9,6 @@ import LeaveModal from "../MONGODB/LeaveModal.";
 
 export const action = async ({ request }) => {
     const data = JSON.parse(await request.text());
-    // console.log('data from applyLeave api', data);
     const { admin, session } = await authenticate.admin(request);
 
     try {
@@ -26,23 +25,6 @@ export const action = async ({ request }) => {
         });
 
         await newLeave.save();
-
-
-        // console.log("new Date(data.leaveStartDate).toISOString()", new Date(data.leaveStartDate).toISOString());
-        // console.log("new Date(data.leaveEndDate).toISOString()", new Date(data.leaveEndDate).toISOString());
-        // console.log("new Date(new Date(data.leaveStartDate).getTime() + 24 * 60 * 60 * 1000).toISOString()",
-        //     new Date(new Date(data.leaveStartDate).getTime() + 24 * 60 * 60 * 1000).toISOString());
-        // console.log("new Date(new Date(data.leaveEndDate).getTime() + 24 * 60 * 60 * 1000).toISOString()",
-        //     new Date(new Date(data.leaveEndDate).getTime() + 24 * 60 * 60 * 1000).toISOString());
-        // console.log("data.leaveStartDate", data.leaveStartDate);
-        // console.log("data.leaveEndDate", data.leaveEndDate);
-        // console.log("new Date(data.leaveStartDate).toISOString()", new Date(data.leaveStartDate).toISOString());
-        // console.log("new Date(data.leaveStartDate)", new Date(data.leaveStartDate));
-
-
-        // console.log("new Date(data.leaveStartDate).toISOString().split('T')[0]", new Date(data.leaveStartDate).toISOString().split('T')[0]);
-
-
 
         // .......... calendar event code ............
         const event = {
@@ -80,7 +62,6 @@ export const action = async ({ request }) => {
         const authClient = await auth.getClient();
 
         const calendarId = process.env.GOOGLE_CALENDAR_ID;
-        // console.log('caldsfasdf', calendarId);
 
         await calendar.events.insert({
             auth: authClient,
@@ -91,7 +72,6 @@ export const action = async ({ request }) => {
                 console.log('There was an error contacting the Calendar service: ' + err);
                 return;
             }
-            console.log('Event created: %s', event);
         });
         // ............ end ............
 

@@ -43,15 +43,11 @@ export default function LeaveRequestsComponent() {
             isInitialRender.current = false;
             return;
         }
-        // console.log('totalPages', totalPages);
         fetchLeaveRequestRecords();
-        // console.log('currentPage', currentPage);
-        // console.log('currentQueryPage', currentQueryPage);
     }, [currentPage, queryValue, currentQueryPage, dateFilter,]);
 
 
     const fetchLeaveRequestRecords = async () => {
-        // console.log('hit fetchLeaveRequestRecords');
         const query = {
             queryKeyword: queryValue.length > 0 ? queryValue : 'All',
             startDate: dateFilter.startDate ? moment(dateFilter.startDate).format('MMM DD, YYYY') : false,
@@ -62,9 +58,7 @@ export default function LeaveRequestsComponent() {
 
         try {
             const queryParams = JSON.stringify(query)
-            // console.log('queryParams from leaveRequestsComponent', queryParams);
             const clientDate = moment().format().split('T')[0];
-            console.log('clientdate', clientDate);
 
             const response = await fetch(`/api/getAppliedLeave/${false}/${queryParams}/
           ${page}/${itemsPerPage}/${clientDate}`, {
@@ -79,10 +73,7 @@ export default function LeaveRequestsComponent() {
                 setLeaveRequestRecords(data)
                 setHasNextPage(hasNextPageS)
                 setHasPrevPage(hasPrevPageS)
-                // console.log('data from myleavecomponent', data);
-                // console.log('Math.ceil(totalItemsS / limit)', Math.ceil(totalItemsS / limit));
                 setTotalPages(Math.ceil(totalItemsS / limit));
-
             }
 
         } catch (error) {
@@ -115,10 +106,7 @@ export default function LeaveRequestsComponent() {
 
             if (response.ok) {
                 const { data, message } = await response.json()
-                // console.log('data got from leaveActionAdmin', {
-                //     data,
-                //     message
-                // });
+
                 showToast(message)
                 if (data) {
                     await fetchLeaveRequestRecords()
@@ -134,12 +122,9 @@ export default function LeaveRequestsComponent() {
     }
 
     const handleRejectToggle = (id, type) => {
-        // console.log('hit modal triger', id);
         type && setActionID(id)
         setConfirmationModal(prev => !prev)
-
     }
-
 
     return (
         <>

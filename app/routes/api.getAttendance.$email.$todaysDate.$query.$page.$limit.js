@@ -4,16 +4,9 @@ import AttendanceModel from "../MONGODB/Attendance";
 
 
 export const loader = async ({ params, request }) => {
-    console.log('params from getAttendance', params);
-    console.log('new date', new Date(params.todaysDate));
-
     const query = JSON.parse(params.query)
     const limit = params.limit
     const page = params.page
-
-    console.log('limit from getAttendanace', limit)
-    console.log('page from getAttendance', page);
-    console.log('query from getAttendance', query)
 
     try {
         const { admin, session } = await authenticate.admin(request);
@@ -33,8 +26,6 @@ export const loader = async ({ params, request }) => {
             });
 
             attendanceRecord = gotData.filter((d, i) => {
-                console.log('new Date(d.out_time).toLocaleDateString()', d.out_time?.toLocaleDateString());
-                console.log('new Date(params.todaysDate)', new Date(params.todaysDate)?.toLocaleDateString());
                 if (d.out_time === null) {
                     return d
                 }
@@ -46,96 +37,6 @@ export const loader = async ({ params, request }) => {
 
 
         } else {
-            // console.log('hit else getAttendance');
-
-            // below is the working code but optimization and scalibility issue
-
-            // const queryRegex = new RegExp(query.queryName.replace(/\s+/g, ''), 'i');
-
-            // const matchStage = (query.queryName !== 'All') ? {
-            //     storeURL: session.shop,
-            //     $expr: {
-            //         $regexMatch: {
-            //             input: {
-            //                 $concat: [
-            //                     "$userDetails.firstName",
-            //                     "$userDetails.lastName",
-            //                 ]
-            //             },
-            //             regex: queryRegex
-            //         }
-            //     }
-            // } : {
-            //     storeURL: session.shop
-            // };
-
-            // // console.log('matchStage.//....././//',matchStage);
-
-            // const countPipeline = [
-            //     {
-            //         $lookup: {
-            //             from: "users",
-            //             localField: "email",
-            //             foreignField: "email",
-            //             as: "userDetails"
-            //         }
-            //     },
-            //     { $unwind: "$userDetails" },
-            //     { $match: matchStage },
-            //     { $count: "totalItems" }
-            // ];
-
-            // // console.log('countPipeline....../......../...',countPipeline);
-
-            // const resultFromCount = await AttendanceModel.aggregate(countPipeline);
-            // totalItems = resultFromCount.length > 0 ? resultFromCount[0].totalItems : 0;
-            // totalPages = Math.ceil(totalItems / limit);
-            // hasNextPage = page < totalPages;
-            // hasPrevPage = page > 1;
-
-            // const pipeline = [
-            //     {
-            //         $lookup: {
-            //             from: "users",
-            //             localField: "email",
-            //             foreignField: "email",
-            //             as: "userDetails"
-            //         }
-            //     },
-            //     { $unwind: "$userDetails" },
-            //     { $match: matchStage },
-            // ];
-
-            // if (!query.startDate && !query.endDate) {
-            //     pipeline.push(
-            //         { $skip: (Number(page) - 1) * Number(limit) },
-            //         { $limit: Number(limit) }
-            //     );
-            // }
-
-            // attendanceRecord = await AttendanceModel.aggregate(pipeline);
-
-            // if (query.startDate && !query.endDate) {
-            //     attendanceRecord = attendanceRecord.filter((d, i) => {
-
-            //         if (d.in_time?.toLocaleDateString() >= new Date(query.startDate).toLocaleDateString()) {
-            //             // console.log('new Date(query.startDate).toLocaleDateString()',new Date(query.startDate).toLocaleDateString());
-            //             return d
-            //         }
-
-            //     })
-            // } else if (query.startDate && query.endDate) {
-            //     attendanceRecord = attendanceRecord.filter((d, i) => {
-            //         if (d.in_time?.toLocaleDateString() >= new Date(query.startDate).toLocaleDateString() &&
-            //             d.in_time?.toLocaleDateString() <= new Date(query.endDate).toLocaleDateString()) {
-            //             return d
-            //         }
-
-            //     })
-            // } else {
-
-            // }
-
             // FOR NOW WOKING BELOW CODE IS BUT NOT SURE HOW GOOD
             const queryRegex = new RegExp(query.queryName.replace(/\s+/g, '\\s*'), 'i');
 
@@ -215,13 +116,7 @@ export const loader = async ({ params, request }) => {
             ];
 
             attendanceRecord = await AttendanceModel.aggregate(pipeline);
-
-
-
-            // console.log('attendanceRecord from getAttendance', attendanceRecord);
-
         }
-
 
         return json({
             message: 'success',
@@ -230,7 +125,6 @@ export const loader = async ({ params, request }) => {
             hasPrevPageS: hasPrevPage,
             totalItemsS: totalItems,
             limit
-
         })
     } catch (error) {
         console.error("Error from attendance:", error);

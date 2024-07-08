@@ -38,18 +38,12 @@ export default function EmployeeShiftRecords() {
             isInitialRender.current = false;
             return;
         }
-        // console.log('totalPages', totalPages);
-        // if (queryValue.length > 0 && queryValue.length < 2 ) setCurrentQueryPage(1)
-        // if (queryValue.length < 1 && queryValue.length < 1) setCurrentPage(1)
 
         fetchShiftRecords();
-        // console.log('currentPage', currentPage);
-        // console.log('currentQueryPage', currentQueryPage);
     }, [currentPage, queryValue, currentQueryPage, dateFilter,]);
 
 
     const fetchShiftRecords = async () => {
-        // console.log('hit fetchShiftRecords');
         const query = {
             queryName: queryValue.length > 0 ? queryValue : 'All',
             startDate: dateFilter.startDate ? moment(dateFilter.startDate).format('MMM DD, YYYY') : false,
@@ -60,7 +54,6 @@ export default function EmployeeShiftRecords() {
 
         try {
             const queryParams = JSON.stringify(query)
-            // console.log('queryParams', queryParams);
 
             const response = await fetch(`/api/getAttendance/${false}/${false}/${queryParams}/
             ${page}/${itemsPerPage}`, {
@@ -75,9 +68,7 @@ export default function EmployeeShiftRecords() {
                 setShiftRecords(attendanceData)
                 setHasNextPage(hasNextPageS)
                 setHasPrevPage(hasPrevPageS)
-                // console.log('Math.ceil(totalItemsS / limit)', Math.ceil(totalItemsS / limit));
                 setTotalPages(Math.ceil(totalItemsS / limit));
-
             }
 
         } catch (error) {
