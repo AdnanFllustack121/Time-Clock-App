@@ -1,17 +1,29 @@
-import mongoose from "mongoose";
+// import mongoose from "mongoose";
 import dotenv from 'dotenv'
 dotenv.config()
 
-const mongoConnect = async () => {
-  try {
-    const MONGODB_URI = process.env.MONGODB_URI;
-    let connection = await mongoose.connect(`${MONGODB_URI}/Time-Clock-App`);
-    console.log("mongoDB connection successful.........🔥");
-    return connection
-  } catch (error) {
-    console.log("Error in Database");
-    return error;
+// const mongoConnect = async () => {
+//   try {
+//     const MONGODB_URI = process.env.MONGODB_URI;
+//     let connection = await mongoose.connect(`${MONGODB_URI}/Time-Clock-App`);
+//     console.log("mongoDB connection successful.........🔥");
+//     return connection
+//   } catch (error) {
+//     console.log("Error in Database");
+//     return error;
+//   }
+// }
+
+// export default mongoConnect(); 
+
+import { PrismaClient } from "@prisma/client";
+
+const prisma = global.prisma || new PrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
+  if (!global.prisma) {
+    global.prisma = new PrismaClient();
   }
 }
 
-export default mongoConnect(); 
+export default prisma;

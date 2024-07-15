@@ -5,10 +5,12 @@ import {
   DeliveryMethod,
   shopifyApp,
 } from "@shopify/shopify-app-remix/server";
-import { MongoDBSessionStorage } from '@shopify/shopify-app-session-storage-mongodb';
+// import { MongoDBSessionStorage } from '@shopify/shopify-app-session-storage-mongodb';
 import { restResources } from "@shopify/shopify-api/rest/admin/2024-04";
 import "./db.server";
+import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import dotenv from 'dotenv'
+import prisma from "./db.server";
 
 dotenv.config()
 
@@ -19,10 +21,11 @@ const shopify = shopifyApp({
   scopes: process.env.SCOPES?.split(","),
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
-  sessionStorage: new MongoDBSessionStorage(
-    process.env.MONGODB_URI,
-    'Time-Clock-App',
-  ),
+  // sessionStorage: new MongoDBSessionStorage(
+  //   process.env.MONGODB_URI,
+  //   'Time-Clock-App',
+  // ),
+  sessionStorage: new PrismaSessionStorage(prisma),
   distribution: AppDistribution.AppStore,
   restResources,
   webhooks: {
