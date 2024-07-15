@@ -1,6 +1,7 @@
 import { authenticate } from "../shopify.server";
-import userModel from "../MONGODB/UserModel";
+// import userModel from "../MONGODB/UserModel";
 import { json } from "@remix-run/node";
+import prisma from "../db.server";
 
 export const loader = async ({ request, params }) => {
     try {
@@ -15,6 +16,7 @@ export const loader = async ({ request, params }) => {
         let hasPrevPage;
 
         const queryRegex = query !== 'All' ? new RegExp(query.replace(/\s+/g, '\\s*'), 'i') : /.*/;
+        /*
 
         const matchStage = query !== 'All' ? {
             storeURL: session.shop,
@@ -60,11 +62,41 @@ export const loader = async ({ request, params }) => {
         ];
 
         const gotAllUsers = await userModel.aggregate(pipeline);
+        */
+
+        const matchStage = {
+            where: {
+                AND: [
+                    { storeURL: session.shop },
+                    query !== 'All' ? {
+                        OR: [
+                            { firstName: { contains: query, mode: 'insensitive' } },
+                            { lastName: { contains: query, mode: 'insensitive' } }
+                        ]
+                    } : {}
+                ]
+            }
+        };
+
+        const totalItems = await prisma.users.count(matchStage);
+        totalPages = Math.ceil(totalItems / limit);
+        hasNextPage = page < totalPages;
+        hasPrevPage = page > 1;
+
+        const gotAllUsers = await prisma.users.findMany({
+            ...matchStage,
+            orderBy: [
+                { isAdmin: 'desc' },
+                { firstName: 'asc' }
+            ],
+            skip: (page - 1) * limit,
+            take: limit
+        });
 
         return json({
             message: "Got all users successfully",
             data: gotAllUsers,
-            totalItems: totalItems.count,
+            totalItems: totalItems,
             totalPages,
             hasNextPage,
             hasPrevPage

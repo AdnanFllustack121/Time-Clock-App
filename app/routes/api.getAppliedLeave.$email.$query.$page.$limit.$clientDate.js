@@ -1,6 +1,7 @@
 import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
-import LeaveModal from "../MONGODB/LeaveModal.";
+// import LeaveModal from "../MONGODB/LeaveModal.";
+import prisma from "../db.server";
 
 
 export const loader = async ({ params, request }) => {
@@ -17,11 +18,13 @@ export const loader = async ({ params, request }) => {
         let hasNextPage;
         let hasPrevPage;
 
-        const queryRegex = new RegExp(query.queryKeyword.replace(/\s+/g, '\\s*'), 'i');
+        // const queryRegex = new RegExp(query.queryKeyword.replace(/\s+/g, '\\s*'), 'i');
 
-        const matchStage = {
+        let matchStage = {
             storeURL: session.shop,
         };
+
+        /*
 
         if (params.email !== 'false') {
             matchStage.createdBy = params.email
@@ -111,6 +114,55 @@ export const loader = async ({ params, request }) => {
         ];
 
         leaveRequestRecords = await LeaveModal.aggregate(pipeline);
+
+        */
+
+        if (params.email !== 'false') {
+            matchStage.createdBy = params.email;
+
+            if (query.queryKeyword !== 'All') {
+                matchStage.reason = {
+                    contains: query.queryKeyword
+                };
+            }
+        }
+
+        let dateFilter = {};
+
+        if (query.startDate) {
+            const startDate = new Date(query.startDate);
+            startDate.setHours(0, 0, 0, 0);
+            dateFilter.createdAt = { gte: startDate };
+        }
+
+        if (query.endDate) {
+            const endDate = new Date(query.endDate);
+            endDate.setHours(23, 59, 59, 999);
+            dateFilter.createdAt = { ...dateFilter.createdAt, lte: endDate };
+        }
+
+        totalItems = await prisma.leaves.count({
+            where: {
+                ...matchStage,
+                ...dateFilter,
+            },
+        });
+
+        totalPages = Math.ceil(totalItems / limit);
+        hasNextPage = page < totalPages;
+        hasPrevPage = page > 1;
+
+        leaveRequestRecords = await prisma.leaves.findMany({
+            where: {
+                ...matchStage,
+                ...dateFilter,
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+            skip: (Number(page) - 1) * Number(limit),
+            take: Number(limit),
+        });
 
         return json({
             message: 'success',

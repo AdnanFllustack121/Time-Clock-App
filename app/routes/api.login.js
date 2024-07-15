@@ -2,8 +2,9 @@ import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
 import bcrypt from "bcrypt";
 import md5 from "md5";
-import userModel from "../MONGODB/UserModel";
+// import userModel from "../MONGODB/UserModel";
 import { createSecretToken } from "../components/authentications/createSecretToken";
+import prisma from "../db.server";
 
 
 export const action = async ({ request }) => {
@@ -13,10 +14,10 @@ export const action = async ({ request }) => {
     try {
         const { admin, session } = await authenticate.admin(request);
 
+        // const userFound = await userModel.findOne({ email: email }).exec();
+        const userFound = await prisma.users.findFirst({ where: { email } });
 
-        const userFound = await userModel.findOne({ email: email }).exec();
-
-        if (!userFound) {
+        if (userFound == null) {
             return json({ message: "You are not registered.", error: true, status: false });
         }
 
@@ -31,7 +32,7 @@ export const action = async ({ request }) => {
 
             if (match || matchMd5) {
 
-                const token = await createSecretToken(userFound._id);
+                const token = await createSecretToken(userFound.id);
 
                 return json({ message: "You are logged in successfully", error: false, user: userFound, token, status: true });
             } else {

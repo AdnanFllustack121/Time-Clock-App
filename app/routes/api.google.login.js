@@ -1,7 +1,8 @@
 import { jwtDecode } from "jwt-decode";
-import userModel from "../MONGODB/UserModel";
+// import userModel from "../MONGODB/UserModel";
 import { authenticate } from "../shopify.server";
 import { createSecretToken } from "../components/authentications/createSecretToken";
+import prisma from "../db.server";
 
 export async function action({ request }) {
     const payload = JSON.parse(await request.text());
@@ -11,22 +12,36 @@ export async function action({ request }) {
     try {
         const user_data = jwtDecode(credential);
 
-        const userFound = await userModel.findOne({ email: user_data.email }).exec();
+        // const userFound = await userModel.findOne({ email: user_data.email }).exec();
+        const userFound = await prisma.users.findFirst({ where: { email: user_data.email } });
 
         if (!userFound) {
-            const newUser = new userModel({
-                firstName: user_data.given_name,
-                lastName: user_data.family_name,
-                email: user_data.email,
-                contact: "",
-                password: "",
-                isAdmin: false,
-                isSuperAdmin: false,
-                storeURL: session.shop,
+            const newUser = await prisma.users.create({
+                data: {
+                    firstName: user_data.given_name,
+                    lastName: user_data.family_name,
+                    email: user_data.email,
+                    contact: "",
+                    password: "",
+                    isAdmin: false,
+                    isSuperAdmin: false,
+                    storeURL: session.shop
+                }
             });
-            await newUser.save();
+            
+            // const newUser = new userModel({
+            //     firstName: user_data.given_name,
+            //     lastName: user_data.family_name,
+            //     email: user_data.email,
+            //     contact: "",
+            //     password: "",
+            //     isAdmin: false,
+            //     isSuperAdmin: false,
+            //     storeURL: session.shop,
+            // });
+            // await newUser.save();
 
-            const token = await createSecretToken(newUser._id);
+            const token = await createSecretToken(newUser.id);
 
             return new Response(JSON.stringify({
                 message: 'You have signed up successfully!',
@@ -36,7 +51,7 @@ export async function action({ request }) {
             }), { status: 200 });
         }
 
-        const token = await createSecretToken(userFound._id);
+        const token = await createSecretToken(userFound.id);
 
         return new Response(JSON.stringify({
             message: "You are logged in successfully",

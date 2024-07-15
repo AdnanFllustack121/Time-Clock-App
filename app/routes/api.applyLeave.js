@@ -4,7 +4,8 @@ import calendar from "../utils/googleCalendar.config";
 import { google } from 'googleapis';
 import path from "path";
 import { fileURLToPath } from 'url';
-import LeaveModal from "../MONGODB/LeaveModal.";
+// import LeaveModal from "../MONGODB/LeaveModal.";
+import prisma from "../db.server";
 
 
 export const action = async ({ request }) => {
@@ -12,21 +13,37 @@ export const action = async ({ request }) => {
     const { admin, session } = await authenticate.admin(request);
 
     try {
-        const newLeave = new LeaveModal({
-            type: data.leaveType,
-            reason: data.leaveReason,
-            storeURL: session.shop,
-            duration: data.leaveDuration,
-            startDate: data.leaveStartDate,
-            endDate: data.leaveEndDate,
-            createdAt: data.createdAt,
-            createdBy: data.createdBy,
-            status: data.leaveStatus
+
+        const newLeave = await prisma.leaves.create({
+            data: {
+                type: data.leaveType,
+                reason: data.leaveReason,
+                storeURL: session.shop,
+                duration: data.leaveDuration,
+                startDate: data.leaveStartDate,
+                endDate: data.leaveEndDate == "" ? null : data.leaveEndDate,
+                createdAt: data.createdAt,
+                createdBy: data.createdBy,
+                status: data.leaveStatus
+            }
         });
 
-        await newLeave.save();
+        // const newLeave = new LeaveModal({
+        //     type: data.leaveType,
+        //     reason: data.leaveReason,
+        //     storeURL: session.shop,
+        //     duration: data.leaveDuration,
+        //     startDate: data.leaveStartDate,
+        //     endDate: data.leaveEndDate,
+        //     createdAt: data.createdAt,
+        //     createdBy: data.createdBy,
+        //     status: data.leaveStatus
+        // });
+
+        // await newLeave.save();
 
         // .......... calendar event code ............
+        /*
         const event = {
             'summary': `${data.employeeName} requested leave ${data.leaveEndDate ? `from ${data.leaveStartDate} to ${data.leaveEndDate}` : `on ${data.leaveStartDate}`}.`,
             'description': `Reason: ${data.leaveReason}`,
@@ -74,6 +91,7 @@ export const action = async ({ request }) => {
             }
         });
         // ............ end ............
+        */
 
         return json({
             message: 'Successfully applied leave',

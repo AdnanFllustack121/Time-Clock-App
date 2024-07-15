@@ -1,4 +1,5 @@
-import AttendanceModel from "../MONGODB/Attendance";
+// import AttendanceModel from "../MONGODB/Attendance";
+import prisma from "../db.server";
 
 export async function action({ request }) {
     const payload = JSON.parse(await request.text());
@@ -6,9 +7,11 @@ export async function action({ request }) {
 
     try {
         if (type == "all") {
-            await AttendanceModel.findOneAndUpdate({ _id: id }, { in_time, out_time });
+            // await AttendanceModel.findOneAndUpdate({ _id: id }, { in_time, out_time });
+            await prisma.attendance.update({ where: { id }, data: { in_time, out_time } });
         } else {
-            await AttendanceModel.findOneAndUpdate({ _id: id }, { in_time });
+            // await AttendanceModel.findOneAndUpdate({ _id: id }, { in_time });
+            await prisma.attendance.update({ where: { id }, data: { in_time } });
         }
         return new Response(JSON.stringify({ success: true, message: "Updated Shift Timings Successfully" }), { status: 200 });
     } catch (error) {

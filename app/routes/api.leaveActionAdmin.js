@@ -1,22 +1,29 @@
 import { authenticate } from "../shopify.server"
 import { json } from "@remix-run/node"
-import LeaveModal from "../MONGODB/LeaveModal."
-import userModel from "../MONGODB/UserModel"
+// import LeaveModal from "../MONGODB/LeaveModal."
+// import userModel from "../MONGODB/UserModel"
+import prisma from "../db.server"
 
 export const action = async ({ request }) => {
     const data = JSON.parse(await request.text())
 
     try {
 
-        const updatedData = await LeaveModal.findOneAndUpdate({
-            _id: data.actionID
-        }, {
-            status: data.status
-        }, {
-            new: true
-        })
+        // const updatedData = await LeaveModal.findOneAndUpdate({
+        //     _id: data.actionID
+        // }, {
+        //     status: data.status
+        // }, {
+        //     new: true
+        // })
 
-        const userData = await userModel.findOne({ email: updatedData.createdBy })
+        const updatedData = await prisma.leaves.update({
+            where: { id: data.actionID },
+            data: { status: data.status }
+        });
+
+        // const userData = await userModel.findOne({ email: updatedData.createdBy })
+        const userData = await prisma.users.findFirst({ where: { email: updatedData.createdBy } });
 
         if (updatedData) {
             return json(({

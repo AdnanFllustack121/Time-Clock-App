@@ -1,6 +1,7 @@
 import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
-import AttendanceModel from "../MONGODB/Attendance";
+// import AttendanceModel from "../MONGODB/Attendance";
+import prisma from "../db.server";
 
 
 export const loader = async ({ params, request }) => {
@@ -20,9 +21,16 @@ export const loader = async ({ params, request }) => {
         if (params.email !== 'false') {
 
             // old code working fine but not sorted
-            const gotData = await AttendanceModel.find({
-                storeURL: session.shop,
-                email: params.email,
+            // const gotData = await AttendanceModel.find({
+            //     storeURL: session.shop,
+            //     email: params.email,
+            // });
+
+            const gotData = await prisma.attendance.findMany({
+                where: {
+                    storeURL: session.shop,
+                    email: params.email
+                }
             });
 
             attendanceRecord = gotData.filter((d, i) => {
@@ -37,6 +45,7 @@ export const loader = async ({ params, request }) => {
 
 
         } else {
+            /*
             // FOR NOW WOKING BELOW CODE IS BUT NOT SURE HOW GOOD
             const queryRegex = new RegExp(query.queryName.replace(/\s+/g, '\\s*'), 'i');
 
@@ -116,6 +125,51 @@ export const loader = async ({ params, request }) => {
             ];
 
             attendanceRecord = await AttendanceModel.aggregate(pipeline);
+            */
+
+            const whereConditions = {
+                storeURL: session.shop,
+            };
+
+            if (query.queryName !== 'All') {
+                whereConditions.user = {
+                    OR: [
+                        { firstName: { contains: query.queryName, mode: "insensitive" } },
+                        { lastName: { contains: query.queryName, mode: "insensitive" } },
+                    ]
+                };
+            }
+
+            if (query.startDate) {
+                whereConditions.in_time = {
+                    gte: new Date(query.startDate),
+                };
+            }
+
+            if (query.endDate) {
+                whereConditions.in_time = {
+                    ...whereConditions.in_time,
+                    lte: new Date(query.endDate),
+                };
+            }
+
+            // Construct Prisma query
+            attendanceRecord = await prisma.attendance.findMany({
+                where: whereConditions,
+                orderBy: {
+                    in_time: 'desc',
+                },
+                skip: query.startDate || query.endDate ? 0 : (Number(page) - 1) * Number(limit),
+                take: query.startDate || query.endDate ? undefined : Number(limit),
+            });
+
+            totalItems = await prisma.attendance.count({
+                where: whereConditions,
+            });
+
+            totalPages = Math.ceil(totalItems / limit);
+            hasNextPage = page < totalPages;
+            hasPrevPage = page > 1;
         }
 
         return json({

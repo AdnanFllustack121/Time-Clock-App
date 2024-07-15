@@ -1,7 +1,8 @@
 import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
-import userModel from "../MONGODB/UserModel";
+// import userModel from "../MONGODB/UserModel";
 import jwt from "jsonwebtoken";
+import prisma from "../db.server";
 
 const verifyToken = (token, secret) => {
     return new Promise((resolve, reject) => {
@@ -23,8 +24,10 @@ export const action = async ({ request }) => {
     try {
         const { admin, session } = await authenticate.admin(request);
 
-        const count = await userModel.countDocuments({});
-        if (count > 0) {
+        const count = await prisma.users.findMany();
+        // const count = await userModel.countDocuments({});
+
+        if (count.length > 0) {
             isUserDocEmpty = false
         } else {
             isUserDocEmpty = true
@@ -36,7 +39,9 @@ export const action = async ({ request }) => {
 
         try {
             const decoded = await verifyToken(token, process.env.TOKEN_KEY);
-            const user = await userModel.findById(decoded.id);
+
+            // const user = await userModel.findById(decoded.id);
+            const user = await prisma.users.findFirst({ where: { id: decoded.id } });
 
             if (user) {
                 return json({ status: true, user, isUserDocEmpty });
