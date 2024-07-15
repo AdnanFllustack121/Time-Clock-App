@@ -1,5 +1,6 @@
+import prisma from "../db.server";
 import { authenticate } from "../shopify.server";
-import shopModel from "../MONGODB/ShopModel";
+// import shopModel from "../MONGODB/ShopModel";
 
 export const action = async ({ request }) => {
   const { topic, shop, session, admin } = await authenticate.webhook(request);
@@ -12,7 +13,8 @@ export const action = async ({ request }) => {
   switch (topic) {
     case "APP_UNINSTALLED":
       if (session) {
-        await shopModel.deleteMany({ where: { shop } });
+        // await shopModel.deleteMany({ where: { shop } });
+        await prisma.session.delete({ where: { shop } });
       }
 
       break;

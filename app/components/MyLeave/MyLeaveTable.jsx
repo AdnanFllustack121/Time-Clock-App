@@ -111,14 +111,14 @@ export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurren
 
 
     const rowMarkup =
-        myLeaveRecords.length <= 0 ? [] : myLeaveRecords?.map(({ _id, startDate, endDate, reason, type, createdAt, status }, i) => {
+        myLeaveRecords.length <= 0 ? [] : myLeaveRecords?.map(({ id, startDate, endDate, reason, type, createdAt, status }, i) => {
 
             const differenceInMilliseconds = new Date(endDate) - new Date(startDate);
             const millisecondsInDay = 1000 * 60 * 60 * 24;
 
             const days = Math.floor(differenceInMilliseconds / millisecondsInDay);
             return (
-                <IndexTable.Row key={_id}>
+                <IndexTable.Row key={id}>
                     <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{calculateItemNumber(i)}</Text></IndexTable.Cell>
                     <IndexTable.Cell>{endDate ? `${days + 1}  ${days + 1 === 1 ? 'day' : 'days'}` : '1 day'}</IndexTable.Cell>
                     <IndexTable.Cell>{`${moment(startDate).format('DD-MMM-YYYY')} ${endDate ? `to ${moment(endDate).format('DD-MMM-YYYY')}` : ''} `}</IndexTable.Cell>
@@ -147,13 +147,13 @@ export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurren
                             <Button
                                 icon={<Icon source={EditIcon} />}
                                 onClick={() => {
-                                    toggleActionModal(_id, 'edit')
+                                    toggleActionModal(id, 'edit')
                                 }}
                             />
                             <Button
                                 icon={<Icon source={DeleteIcon} />}
                                 onClick={() => {
-                                    toggleActionModal(_id, 'delete')
+                                    toggleActionModal(id, 'delete')
                                 }}
                                 tone='critical'
                             />

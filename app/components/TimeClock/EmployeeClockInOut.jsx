@@ -99,7 +99,7 @@ function EmployeeClockInOut() {
   const handleClockOut = useCallback(async () => {
     toggleReasonModal()
     setLoadingButton(true)
-    let idToUpdate = todaysAttendance[todaysAttendance.length - 1]?._id
+    let idToUpdate = todaysAttendance[todaysAttendance.length - 1]?.id;
 
     const apiData = {
       out_time: new Date(),
@@ -126,7 +126,7 @@ function EmployeeClockInOut() {
 
         setTodaysAttendance(prevAttendance =>
           prevAttendance.map(d =>
-            d._id === idToUpdate ? { ...d, note: attendanceData.note, out_time: attendanceData.out_time } : d
+            d.id === idToUpdate ? { ...d, note: attendanceData.note, out_time: attendanceData.out_time } : d
           )
         );
 
@@ -185,7 +185,7 @@ function EmployeeClockInOut() {
         const { message, attendanceData } = await response.json()
         setTodaysAttendance(prevAttendance =>
           prevAttendance.map(d =>
-            d._id === editNoteId ? { ...d, note: attendanceData.note } : d
+            d.id === editNoteId ? { ...d, note: attendanceData.note } : d
           )
         );
         showToast(message)

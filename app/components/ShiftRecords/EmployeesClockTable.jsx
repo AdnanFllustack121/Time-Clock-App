@@ -116,7 +116,7 @@ const EmployeesClockTable = ({
 
     const toggleModal = (type, id) => {
         if (type == "adminEdit") {
-            const getRecord = shiftRecords.find((record) => record._id == id);
+            const getRecord = shiftRecords.find((record) => record.id == id);
 
             setAdminEditFields({
                 id,
@@ -136,7 +136,7 @@ const EmployeesClockTable = ({
     };
 
     const handleClockOut = useCallback(async () => {
-        const clockedOutTime = shiftRecords.find(record => record._id === openClockOutModal.idToAction)?.in_time;
+        const clockedOutTime = shiftRecords.find(record => record.id === openClockOutModal.idToAction)?.in_time;
 
         if (clockOutFields.out_time.length < 1) {
             showToast("Please fill in the 'date and time' field. It is required to clock out.");
@@ -169,7 +169,7 @@ const EmployeesClockTable = ({
 
                 setShiftRecords(prevAttendance =>
                     prevAttendance.map(d =>
-                        d._id === openClockOutModal.idToAction ? { ...d, note: clockOutFields.note, out_time: clockOutFields.out_time, status: 'Complete' } : d
+                        d.id === openClockOutModal.idToAction ? { ...d, note: clockOutFields.note, out_time: clockOutFields.out_time, status: 'Complete' } : d
                     )
                 );
             }
@@ -181,8 +181,8 @@ const EmployeesClockTable = ({
         }
     }, [clockOutFields, shiftRecords, snap.user.email, openClockOutModal.idToAction, setShiftRecords]);
 
-    const rowMarkup = shiftRecords.map(({ _id, in_time, out_time, note, userDetails, status }, index) => (
-        <IndexTable.Row key={_id}>
+    const rowMarkup = shiftRecords.map(({ id, in_time, out_time, note, userDetails, status }, index) => (
+        <IndexTable.Row key={id}>
             <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{calculateItemNumber(index)}</Text></IndexTable.Cell>
             <IndexTable.Cell>{`${userDetails?.firstName} ${userDetails?.lastName}`}</IndexTable.Cell>
             <IndexTable.Cell>{moment(in_time).format('MMM DD, YYYY')}</IndexTable.Cell>
@@ -202,14 +202,14 @@ const EmployeesClockTable = ({
             </IndexTable.Cell>
             <IndexTable.Cell>
                 {status === 'Incomplete' &&
-                    <Button onClick={() => toggleModal('adminClockOut', _id)} icon={<Icon source={ClockIcon} />} tone='critical'>
+                    <Button onClick={() => toggleModal('adminClockOut', id)} icon={<Icon source={ClockIcon} />} tone='critical'>
                         Clock Out
                     </Button>
                 }
             </IndexTable.Cell>
             <IndexTable.Cell>
                 <ButtonGroup>
-                    <Button icon={<Icon source={EditIcon} />} onClick={() => toggleModal('adminEdit', _id)} />
+                    <Button icon={<Icon source={EditIcon} />} onClick={() => toggleModal('adminEdit', id)} />
                 </ButtonGroup>
             </IndexTable.Cell>
         </IndexTable.Row>

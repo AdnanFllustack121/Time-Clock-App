@@ -30,10 +30,10 @@ export default function ManageAdminTable({ allUsers,
     }
 
     const rowMarkup =
-        allUsers.length <= 0 ? [] : allUsers?.map(({ _id, firstName, lastName, isAdmin, email, contact }, i) => {
+        allUsers.length <= 0 ? [] : allUsers?.map(({ id, firstName, lastName, isAdmin, email, contact }, i) => {
 
             return (
-                <IndexTable.Row key={_id}>
+                <IndexTable.Row key={id}>
                     <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{calculateItemNumber(i)}</Text></IndexTable.Cell>
                     <IndexTable.Cell>{firstName}</IndexTable.Cell>
                     <IndexTable.Cell>{lastName}</IndexTable.Cell>
@@ -42,7 +42,7 @@ export default function ManageAdminTable({ allUsers,
                     <IndexTable.Cell>{isAdmin ? <p style={{ color: 'rgb(80, 148, 95)' }}>Yes</p> : <p style={{ color: 'rgb(238, 78, 78)' }}>No</p>}</IndexTable.Cell>
                     <IndexTable.Cell>
                         <div className='adminAction'>
-                            {isAdmin ? <Button tone='critical' onClick={() => handleButtonClick("revokeAdmin", { _id, firstName, lastName, email })}>Revoke Admin</Button> : <Button onClick={() => handleButtonClick("assignAdmin", { _id, firstName, lastName, email })}>Assign Admin</Button>}
+                            {isAdmin ? <Button tone='critical' onClick={() => handleButtonClick("revokeAdmin", { id, firstName, lastName, email })}>Revoke Admin</Button> : <Button onClick={() => handleButtonClick("assignAdmin", { id, firstName, lastName, email })}>Assign Admin</Button>}
                         </div>
                     </IndexTable.Cell>
                 </IndexTable.Row>

@@ -161,7 +161,7 @@ export default function MyLeaveComponent() {
     }
     if (type === 'edit') {
       if (id) {
-        const dataToUpdate = myLeaveRecords.filter(_d => _d._id === id)[0]
+        const dataToUpdate = myLeaveRecords.filter(_d => _d.id === id)[0]
         setFormValues({
           leaveType: dataToUpdate.type,
           leaveReason: dataToUpdate.reason,

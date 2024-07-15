@@ -108,16 +108,16 @@ export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable
     }
 
     const rowMarkup =
-        leaveRequestRecords.length <= 0 ? [] : leaveRequestRecords?.map(({ _id, startDate, endDate, reason, type, createdAt, status, userDetails }, i) => {
+        leaveRequestRecords.length <= 0 ? [] : leaveRequestRecords?.map(({ id, startDate, endDate, reason, type, createdAt, status, userDetails }, i) => {
 
             const differenceInMilliseconds = new Date(endDate) - new Date(startDate);
             const millisecondsInDay = 1000 * 60 * 60 * 24;
 
             const days = Math.floor(differenceInMilliseconds / millisecondsInDay);
             return (
-                <IndexTable.Row key={_id}>
+                <IndexTable.Row key={id}>
                     <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{calculateItemNumber(i)}</Text></IndexTable.Cell>
-                    <IndexTable.Cell>{`${userDetails.firstName} ${userDetails.lastName}`}</IndexTable.Cell>
+                    <IndexTable.Cell>{`${userDetails?.firstName ?? undefined} ${userDetails?.lastName ?? undefined}`}</IndexTable.Cell>
                     <IndexTable.Cell>{endDate ? `${days + 1}  ${days + 1 === 1 ? 'day' : 'days'}` : '1 day'}</IndexTable.Cell>
                     <IndexTable.Cell>{`${moment(startDate).format('DD-MMM-YYYY')} ${endDate ? `to ${moment(endDate).format('DD-MMM-YYYY')}` : ''}`}</IndexTable.Cell>
                     <IndexTable.Cell>
@@ -145,10 +145,10 @@ export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable
                             <Button
                                 variant="primary"
                                 tone="success"
-                                loading={isLoadingActionBTN[_id] === 'approve'}
+                                loading={isLoadingActionBTN[id] === 'approve'}
                                 icon={<Icon source={CheckIcon} />}
                                 onClick={() => {
-                                    leaveAdminAction(_id, 'approve');
+                                    leaveAdminAction(id, 'approve');
                                 }}
                             >
                                 Approve
@@ -158,9 +158,9 @@ export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable
                                 variant="primary"
                                 tone="critical"
                                 icon={<Icon source={XIcon} />}
-                                loading={isLoadingActionBTN[_id] === 'reject'}
+                                loading={isLoadingActionBTN[id] === 'reject'}
                                 onClick={() => {
-                                    handleRejectToggle(_id, 'reject');
+                                    handleRejectToggle(id, 'reject');
                                 }}
                                 style={{ alignSelf: 'flex-end' }}
                             >

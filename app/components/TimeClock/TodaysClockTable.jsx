@@ -45,8 +45,8 @@ export default function TodaysClockTable({ todaysAttendance, isLoadingClockInCar
     }
   }, [todaysAttendance, isLoadingClockInCard]);
 
-  const rowMarkup = todaysAttendance?.map(({ _id, in_time, out_time, note }, i) => (
-    <IndexTable.Row key={_id}>
+  const rowMarkup = todaysAttendance?.map(({ id, in_time, out_time, note }, i) => (
+    <IndexTable.Row key={id}>
       <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{i + 1}</Text></IndexTable.Cell>
       <IndexTable.Cell>{moment(in_time).format('MMM DD, YYYY')}</IndexTable.Cell>
       <IndexTable.Cell>{formatTime(in_time)}</IndexTable.Cell>
@@ -58,7 +58,7 @@ export default function TodaysClockTable({ todaysAttendance, isLoadingClockInCar
             <Button
               icon={<Icon source={ChatIcon} />}
               disabled={out_time ? false : true}
-              onClick={() => handleViewNote(_id, note)}
+              onClick={() => handleViewNote(id, note)}
             />
           </Tooltip>
         </ButtonGroup>

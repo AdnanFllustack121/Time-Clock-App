@@ -15,7 +15,7 @@ export default function ManageAdminsModal({
             title={type === 'assignAdmin' ? "Assign Admin" : "Revoke Admin"}
             primaryAction={{
                 content: primaryContent,
-                onAction: () => handleManageAdminStatus(type, getActiveUser._id),
+                onAction: () => handleManageAdminStatus(type, getActiveUser.id),
             }}
             secondaryActions={[
                 {
