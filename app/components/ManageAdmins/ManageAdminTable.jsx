@@ -61,7 +61,7 @@ export default function ManageAdminTable({ allUsers,
                 <>
                     <IndexFilters
                         queryValue={queryValue}
-                        queryPlaceholder="Searching in reason"
+                        queryPlaceholder="Searching in First Name, Last Name and Email"
                         onQueryChange={(_d) => setQueryValue(_d)}
                         cancelAction={{
                             onAction: () => { setCurrentPage(1) },

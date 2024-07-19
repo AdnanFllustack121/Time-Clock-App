@@ -176,7 +176,7 @@ export default function MyLeaveTable({ myLeaveRecords, isLoadingTable, setCurren
                 <>
                     <IndexFilters
                         queryValue={queryValue}
-                        queryPlaceholder="Searching in reason"
+                        queryPlaceholder="Searching in Reason, Leave Type and Status"
                         onQueryChange={handleFiltersQueryChange}
                         onQueryFocus={() => setCurrentQueryPage(1)}
                         cancelAction={{

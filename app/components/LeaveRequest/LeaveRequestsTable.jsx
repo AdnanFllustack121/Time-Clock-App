@@ -187,7 +187,7 @@ export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable
                 <>
                     <IndexFilters
                         queryValue={queryValue}
-                        queryPlaceholder="Searching in name"
+                        queryPlaceholder="Searching in Name, Reason, Leave Type and Status"
                         onQueryChange={handleFiltersQueryChange}
                         onQueryFocus={() => setCurrentQueryPage(1)}
                         cancelAction={{

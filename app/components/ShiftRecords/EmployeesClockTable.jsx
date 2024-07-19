@@ -281,7 +281,7 @@ const EmployeesClockTable = ({
                 <>
                     <IndexFilters
                         queryValue={queryValue}
-                        queryPlaceholder="Searching in employee name"
+                        queryPlaceholder="Searching in Employee Name and Status"
                         onQueryChange={handleFiltersQueryChange}
                         onQueryFocus={() => setCurrentQueryPage(1)}
                         cancelAction={{ onAction: () => setCurrentPage(1), disabled: false, loading: false }}
