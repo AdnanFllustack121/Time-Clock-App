@@ -32,36 +32,40 @@ model Session {
 }
 
 model Users {
-  id            Int      @id @default(autoincrement())
-  firstName     String?
-  lastName      String?
-  email         String?
-  contact       String?
-  password      String?
-  isSuperAdmin  Boolean?
-  isAdmin       Boolean?
-  storeURL      String?
+  id           Int          @id @default(autoincrement())
+  firstName    String?
+  lastName     String?
+  email        String?      @unique
+  contact      String?
+  password     String?
+  isSuperAdmin Boolean?
+  isAdmin      Boolean?
+  storeURL     String?
+  Attendance   Attendance[]
+  Leaves       Leaves[]
 }
 
 model Attendance {
-  id            Int      @id @default(autoincrement())
-  email         String
-  in_time       DateTime
-  out_time      DateTime?    
-  note          String?
-  status        String
-  storeURL      String?
+  id          Int       @id @default(autoincrement())
+  email       String
+  in_time     DateTime
+  out_time    DateTime?
+  note        String?
+  status      String
+  storeURL    String?
+  userDetails Users     @relation(fields: [email], references: [email])
 }
 
 model Leaves {
-  id            Int      @id @default(autoincrement())
-  type          String?
-  reason        String?
-  storeURL      String?
-  duration      String?
-  startDate     DateTime?
-  endDate       DateTime?
-  createdAt     DateTime?
-  createdBy     String?
-  status        String?
+  id          Int       @id @default(autoincrement())
+  type        String?
+  reason      String?
+  storeURL    String?
+  duration    String?
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime?
+  createdBy   String
+  status      String?
+  userDetails Users     @relation(fields: [createdBy], references: [email])
 }
