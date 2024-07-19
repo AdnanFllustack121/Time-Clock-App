@@ -30,6 +30,9 @@ export const loader = async ({ params, request }) => {
                 where: {
                     storeURL: session.shop,
                     email: params.email
+                },
+                include: {
+                    userDetails: true
                 }
             });
 
@@ -128,17 +131,26 @@ export const loader = async ({ params, request }) => {
             */
 
             const whereConditions = {
-                storeURL: session.shop,
+                AND: [
+                    { storeURL: session.shop },
+                    query.queryName !== 'All' ? {
+                        OR: [
+                            { userDetails: { firstName: { contains: query.queryName } } },
+                            { userDetails: { lastName: { contains: query.queryName } } },
+                            { status: { contains: query.queryName } }
+                        ]
+                    } : {}
+                ]
             };
 
-            if (query.queryName !== 'All') {
-                whereConditions.user = {
-                    OR: [
-                        { firstName: { contains: query.queryName, mode: "insensitive" } },
-                        { lastName: { contains: query.queryName, mode: "insensitive" } },
-                    ]
-                };
-            }
+            // if (query.queryName !== 'All') {
+            //     whereConditions.user = {
+            //         OR: [
+            //             { firstName: { contains: query.queryName, mode: "insensitive" } },
+            //             { lastName: { contains: query.queryName, mode: "insensitive" } },
+            //         ]
+            //     };
+            // }
 
             if (query.startDate) {
                 whereConditions.in_time = {
@@ -156,6 +168,9 @@ export const loader = async ({ params, request }) => {
             // Construct Prisma query
             attendanceRecord = await prisma.attendance.findMany({
                 where: whereConditions,
+                include: {
+                    userDetails: true
+                },
                 orderBy: {
                     in_time: 'desc',
                 },

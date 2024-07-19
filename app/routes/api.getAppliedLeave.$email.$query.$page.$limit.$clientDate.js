@@ -21,7 +21,18 @@ export const loader = async ({ params, request }) => {
         // const queryRegex = new RegExp(query.queryKeyword.replace(/\s+/g, '\\s*'), 'i');
 
         let matchStage = {
-            storeURL: session.shop,
+            AND: [
+                { storeURL: session.shop },
+                query.queryKeyword !== 'All' ? {
+                    OR: [
+                        { type: { contains: query.queryKeyword } },
+                        { status: { contains: query.queryKeyword } },
+                        { reason: { contains: query.queryKeyword } },
+                        { userDetails: { firstName: { contains: query.queryKeyword } } },
+                        { userDetails: { lastName: { contains: query.queryKeyword } } }
+                    ]
+                } : {}
+            ]
         };
 
         /*
@@ -120,11 +131,11 @@ export const loader = async ({ params, request }) => {
         if (params.email !== 'false') {
             matchStage.createdBy = params.email;
 
-            if (query.queryKeyword !== 'All') {
-                matchStage.reason = {
-                    contains: query.queryKeyword
-                };
-            }
+            // if (query.queryKeyword !== 'All') {
+            //     matchStage.reason = {
+            //         contains: query.queryKeyword
+            //     };
+            // }
         }
 
         let dateFilter = {};
@@ -156,6 +167,9 @@ export const loader = async ({ params, request }) => {
             where: {
                 ...matchStage,
                 ...dateFilter,
+            },
+            include: {
+                userDetails: true
             },
             orderBy: {
                 createdAt: 'desc',

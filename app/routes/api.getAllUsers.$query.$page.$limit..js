@@ -70,8 +70,9 @@ export const loader = async ({ request, params }) => {
                     { storeURL: session.shop },
                     query !== 'All' ? {
                         OR: [
-                            { firstName: { contains: query, mode: 'insensitive' } },
-                            { lastName: { contains: query, mode: 'insensitive' } }
+                            { firstName: { contains: query } },
+                            { lastName: { contains: query } },
+                            { email: { contains: query } }
                         ]
                     } : {}
                 ]
