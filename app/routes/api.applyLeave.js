@@ -43,18 +43,21 @@ export const action = async ({ request }) => {
         // await newLeave.save();
 
         // .......... calendar event code ............
-        /*
+
+        const eventLeaveEndDate = data.leaveEndDate != "" ? String(data.leaveEndDate).split("T")[0] : "";
+        const eventLeaveStartDate = String(data.leaveStartDate).split("T")[0];
+
         const event = {
-            'summary': `${data.employeeName} requested leave ${data.leaveEndDate ? `from ${data.leaveStartDate} to ${data.leaveEndDate}` : `on ${data.leaveStartDate}`}.`,
+            'summary': `${data.employeeName} requested leave ${eventLeaveEndDate ? `from ${eventLeaveStartDate} to ${eventLeaveEndDate}` : `on ${eventLeaveStartDate}`}.`,
             'description': `Reason: ${data.leaveReason}`,
             'start': {
-                'date': data.leaveStartDate,
+                'date': eventLeaveStartDate,
                 'timeZone': data.userTimezone,
             },
             'end': {
-                'date': data.leaveEndDate ?
-                    new Date(new Date(data.leaveEndDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
-                    data.leaveStartDate,
+                'date': eventLeaveEndDate ?
+                    new Date(new Date(eventLeaveEndDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
+                    eventLeaveStartDate,
                 'timeZone': data.userTimezone,
             },
             'attendees': [],
@@ -69,7 +72,7 @@ export const action = async ({ request }) => {
 
         const __filename = fileURLToPath(import.meta.url);
         const __dirname = path.dirname(__filename);
-        const keyFilePath = path.resolve(__dirname, '../../calendar-events-creator-425308-9244b58d5d57.json');
+        const keyFilePath = path.resolve(__dirname, '../../midwestapi-d13d5c77f160.json');
 
         const auth = new google.auth.GoogleAuth({
             keyFile: keyFilePath,
@@ -91,7 +94,6 @@ export const action = async ({ request }) => {
             }
         });
         // ............ end ............
-        */
 
         return json({
             message: 'Successfully applied leave',
