@@ -153,15 +153,21 @@ export const loader = async ({ params, request }) => {
             // }
 
             if (query.startDate) {
+                const startDate = new Date(query.startDate);
+                startDate.setHours(0, 0, 0, 0);
+
                 whereConditions.in_time = {
-                    gte: new Date(query.startDate),
+                    gte: new Date(startDate),
                 };
             }
 
             if (query.endDate) {
+                const endDate = new Date(query.endDate);
+                endDate.setHours(23, 59, 59, 999);
+
                 whereConditions.in_time = {
                     ...whereConditions.in_time,
-                    lte: new Date(query.endDate),
+                    lte: new Date(endDate),
                 };
             }
 

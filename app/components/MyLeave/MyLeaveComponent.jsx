@@ -166,8 +166,8 @@ export default function MyLeaveComponent() {
           leaveType: dataToUpdate.type,
           leaveReason: dataToUpdate.reason,
           leaveDuration: dataToUpdate.duration,
-          leaveStartDate: dataToUpdate.startDate,
-          leaveEndDate: dataToUpdate.endDate,
+          leaveStartDate: String(dataToUpdate.startDate).split('T')[0],
+          leaveEndDate: dataToUpdate.endDate != null ? String(dataToUpdate.endDate).split('T')[0] : dataToUpdate.endDate,
           leaveStatus: 'Pending'
         })
       } else {

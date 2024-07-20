@@ -35,8 +35,8 @@ export const action = async ({ request }) => {
                     reason: data.leaveReason,
                     storeURL: session.shop,
                     duration: data.leaveDuration,
-                    startDate: data.leaveStartDate,
-                    endDate: data.leaveEndDate,
+                    startDate: new Date(data.leaveStartDate),
+                    endDate: data.leaveEndDate != null ? data.leaveEndDate != "" ? new Date(data.leaveEndDate) : null : null,
                     createdAt: data.createdAt,
                     createdBy: data.createdBy,
                     status: data.leaveStatus

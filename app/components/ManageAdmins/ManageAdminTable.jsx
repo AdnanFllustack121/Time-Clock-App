@@ -75,6 +75,7 @@ export default function ManageAdminTable({ allUsers,
                         filters={[]}
                         canCreateNewView={false}
                         mode={mode}
+                        hideFilters
                         setMode={setMode}
                     />
                     <IndexTable

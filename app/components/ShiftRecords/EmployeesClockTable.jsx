@@ -184,7 +184,8 @@ const EmployeesClockTable = ({
     const rowMarkup = shiftRecords.map(({ id, in_time, out_time, note, userDetails, status }, index) => (
         <IndexTable.Row key={id}>
             <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{calculateItemNumber(index)}</Text></IndexTable.Cell>
-            <IndexTable.Cell>{`${userDetails?.firstName} ${userDetails?.lastName}`}</IndexTable.Cell>
+            <IndexTable.Cell>{userDetails?.firstName}</IndexTable.Cell>
+            <IndexTable.Cell>{userDetails?.lastName}</IndexTable.Cell>
             <IndexTable.Cell>{moment(in_time).format('MMM DD, YYYY')}</IndexTable.Cell>
             <IndexTable.Cell>{formatTime(in_time)}</IndexTable.Cell>
             <IndexTable.Cell>{out_time ? moment(out_time).format('MMM DD, YYYY') : "--"}</IndexTable.Cell>
@@ -281,7 +282,7 @@ const EmployeesClockTable = ({
                 <>
                     <IndexFilters
                         queryValue={queryValue}
-                        queryPlaceholder="Searching in Employee Name and Status"
+                        queryPlaceholder="Searching in First Name, Last Name and Status"
                         onQueryChange={handleFiltersQueryChange}
                         onQueryFocus={() => setCurrentQueryPage(1)}
                         cancelAction={{ onAction: () => setCurrentPage(1), disabled: false, loading: false }}
@@ -303,7 +304,7 @@ const EmployeesClockTable = ({
                     <IndexTable
                         itemCount={shiftRecords.length}
                         headings={[
-                            { title: 'No.' }, { title: 'Employee Name.' }, { title: 'In Date' }, { title: 'In Time' },
+                            { title: 'No.' }, { title: 'First Name' }, { title: 'Last Name' }, { title: 'In Date' }, { title: 'In Time' },
                             { title: 'Out Date' }, { title: 'Out Time' }, { title: 'Note' }, { title: 'Duration' },
                             { title: 'Status' }, { title: 'Status Action' }, { title: 'Action' }
                         ]}

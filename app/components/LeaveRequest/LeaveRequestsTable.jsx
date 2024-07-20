@@ -117,7 +117,8 @@ export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable
             return (
                 <IndexTable.Row key={id}>
                     <IndexTable.Cell><Text variant="bodyMd" fontWeight="bold">{calculateItemNumber(i)}</Text></IndexTable.Cell>
-                    <IndexTable.Cell>{`${userDetails?.firstName ?? undefined} ${userDetails?.lastName ?? undefined}`}</IndexTable.Cell>
+                    <IndexTable.Cell>{userDetails?.firstName}</IndexTable.Cell>
+                    <IndexTable.Cell>{userDetails?.lastName}</IndexTable.Cell>
                     <IndexTable.Cell>{endDate ? `${days + 1}  ${days + 1 === 1 ? 'day' : 'days'}` : '1 day'}</IndexTable.Cell>
                     <IndexTable.Cell>{`${moment(startDate).format('DD-MMM-YYYY')} ${endDate ? `to ${moment(endDate).format('DD-MMM-YYYY')}` : ''}`}</IndexTable.Cell>
                     <IndexTable.Cell>
@@ -187,7 +188,7 @@ export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable
                 <>
                     <IndexFilters
                         queryValue={queryValue}
-                        queryPlaceholder="Searching in Name, Reason, Leave Type and Status"
+                        queryPlaceholder="Searching in First Name, Last Name, Reason, Leave Type and Status"
                         onQueryChange={handleFiltersQueryChange}
                         onQueryFocus={() => setCurrentQueryPage(1)}
                         cancelAction={{
@@ -211,7 +212,8 @@ export default function LeaveRequestsTable({ leaveRequestRecords, isLoadingTable
                         itemCount={leaveRequestRecords?.length ?? 0}
                         headings={[
                             { title: 'No.' },
-                            { title: 'Name' },
+                            { title: 'First Name' },
+                            { title: 'Last Name' },
                             { title: 'Duration' },
                             { title: 'Date' },
                             { title: 'Leave Type' },

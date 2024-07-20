@@ -13,3 +13,11 @@ c) employee
     emergency contact and other details client will tell about the information later he want for the employee
 
 5. Need to make a employee shift records in time and out time editable for admin
+
+
+BUGS JULY-19
+
+1. Fix table search with first name and last name try using concat.
+2. Need to fix the applied leave update issue.
+3. Need to fix a In date to issue on a shift records page while selecting a particular date that date data should also come in range.    
+4. Need to remove a filter icon from All users table.
